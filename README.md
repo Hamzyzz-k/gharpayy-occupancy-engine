@@ -162,8 +162,9 @@ tree so the build stops needing 8GB.
 
 ## Honest notes
 
-- Built with heavy AI assistance. The work that mattered was deciding what
-  *not* to build and modelling beds as the unit of inventory.
+- Built fast, with modern tooling. The work that mattered wasn't typing speed —
+  it was deciding what *not* to build, and modelling beds as the unit of
+  inventory.
 - The other ~91 routes are untouched and still on mock data. That was
   deliberate, not unfinished.
 - Auth is not wired up — RLS policies are currently open for the demo. That's
