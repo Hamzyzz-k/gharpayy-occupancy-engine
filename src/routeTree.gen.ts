@@ -65,6 +65,7 @@ import { Route as TowerIndexRouteImport } from './routes/tower.index'
 import { Route as SupplyHubIndexRouteImport } from './routes/supply-hub/index'
 import { Route as Property360IndexRouteImport } from './routes/property360/index'
 import { Route as OwnerIndexRouteImport } from './routes/owner/index'
+import { Route as OccupancyIndexRouteImport } from './routes/occupancy.index'
 import { Route as MytIndexRouteImport } from './routes/myt/index'
 import { Route as CribbookingIndexRouteImport } from './routes/cribbooking/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -99,6 +100,10 @@ import { Route as OwnerRoomsRouteImport } from './routes/owner/rooms'
 import { Route as OwnerInventoryRouteImport } from './routes/owner/inventory'
 import { Route as OwnerInsightsRouteImport } from './routes/owner/insights'
 import { Route as OwnerBlocksRouteImport } from './routes/owner/blocks'
+import { Route as OccupancyRescueRouteImport } from './routes/occupancy.rescue'
+import { Route as OccupancyRadarRouteImport } from './routes/occupancy.radar'
+import { Route as OccupancyPipelineRouteImport } from './routes/occupancy.pipeline'
+import { Route as OccupancyInventoryRouteImport } from './routes/occupancy.inventory'
 import { Route as MytZonesRouteImport } from './routes/myt/zones'
 import { Route as MytWarRoomRouteImport } from './routes/myt/war-room'
 import { Route as MytToursRouteImport } from './routes/myt/tours'
@@ -141,6 +146,8 @@ import { Route as TowerReviewIndexRouteImport } from './routes/tower.review.inde
 import { Route as TowerReviewIdRouteImport } from './routes/tower.review.$id'
 import { Route as TowerLeadsIdRouteImport } from './routes/tower.leads.$id'
 import { Route as OwnerMediaRoomIdRouteImport } from './routes/owner/media.$roomId'
+import { Route as OccupancyLeadLeadIdRouteImport } from './routes/occupancy.lead.$leadId'
+import { Route as OccupancyBedBedIdRouteImport } from './routes/occupancy.bed.$bedId'
 import { Route as MytTourIdRouteImport } from './routes/myt/tour.$id'
 import { Route as MytTcmPerformanceRouteImport } from './routes/myt/tcm.performance'
 import { Route as MytTcmActionsRouteImport } from './routes/myt/tcm.actions'
@@ -427,6 +434,11 @@ const OwnerIndexRoute = OwnerIndexRouteImport.update({
   path: '/owner/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OccupancyIndexRoute = OccupancyIndexRouteImport.update({
+  id: '/occupancy/',
+  path: '/occupancy/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MytIndexRoute = MytIndexRouteImport.update({
   id: '/myt/',
   path: '/myt/',
@@ -595,6 +607,26 @@ const OwnerInsightsRoute = OwnerInsightsRouteImport.update({
 const OwnerBlocksRoute = OwnerBlocksRouteImport.update({
   id: '/owner/blocks',
   path: '/owner/blocks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OccupancyRescueRoute = OccupancyRescueRouteImport.update({
+  id: '/occupancy/rescue',
+  path: '/occupancy/rescue',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OccupancyRadarRoute = OccupancyRadarRouteImport.update({
+  id: '/occupancy/radar',
+  path: '/occupancy/radar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OccupancyPipelineRoute = OccupancyPipelineRouteImport.update({
+  id: '/occupancy/pipeline',
+  path: '/occupancy/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OccupancyInventoryRoute = OccupancyInventoryRouteImport.update({
+  id: '/occupancy/inventory',
+  path: '/occupancy/inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MytZonesRoute = MytZonesRouteImport.update({
@@ -807,6 +839,16 @@ const OwnerMediaRoomIdRoute = OwnerMediaRoomIdRouteImport.update({
   path: '/owner/media/$roomId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OccupancyLeadLeadIdRoute = OccupancyLeadLeadIdRouteImport.update({
+  id: '/occupancy/lead/$leadId',
+  path: '/occupancy/lead/$leadId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OccupancyBedBedIdRoute = OccupancyBedBedIdRouteImport.update({
+  id: '/occupancy/bed/$bedId',
+  path: '/occupancy/bed/$bedId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MytTourIdRoute = MytTourIdRouteImport.update({
   id: '/myt/tour/$id',
   path: '/myt/tour/$id',
@@ -924,6 +966,10 @@ export interface FileRoutesByFullPath {
   '/myt/tours': typeof MytToursRoute
   '/myt/war-room': typeof MytWarRoomRoute
   '/myt/zones': typeof MytZonesRoute
+  '/occupancy/inventory': typeof OccupancyInventoryRoute
+  '/occupancy/pipeline': typeof OccupancyPipelineRoute
+  '/occupancy/radar': typeof OccupancyRadarRoute
+  '/occupancy/rescue': typeof OccupancyRescueRoute
   '/owner/blocks': typeof OwnerBlocksRoute
   '/owner/insights': typeof OwnerInsightsRoute
   '/owner/inventory': typeof OwnerInventoryRoute
@@ -958,6 +1004,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/cribbooking/': typeof CribbookingIndexRoute
   '/myt/': typeof MytIndexRoute
+  '/occupancy/': typeof OccupancyIndexRoute
   '/owner/': typeof OwnerIndexRoute
   '/property360/': typeof Property360IndexRoute
   '/supply-hub/': typeof SupplyHubIndexRoute
@@ -966,6 +1013,8 @@ export interface FileRoutesByFullPath {
   '/myt/tcm/actions': typeof MytTcmActionsRoute
   '/myt/tcm/performance': typeof MytTcmPerformanceRoute
   '/myt/tour/$id': typeof MytTourIdRouteWithChildren
+  '/occupancy/bed/$bedId': typeof OccupancyBedBedIdRoute
+  '/occupancy/lead/$leadId': typeof OccupancyLeadLeadIdRoute
   '/owner/media/$roomId': typeof OwnerMediaRoomIdRoute
   '/tower/leads/$id': typeof TowerLeadsIdRoute
   '/tower/review/$id': typeof TowerReviewIdRoute
@@ -1061,6 +1110,10 @@ export interface FileRoutesByTo {
   '/myt/tours': typeof MytToursRoute
   '/myt/war-room': typeof MytWarRoomRoute
   '/myt/zones': typeof MytZonesRoute
+  '/occupancy/inventory': typeof OccupancyInventoryRoute
+  '/occupancy/pipeline': typeof OccupancyPipelineRoute
+  '/occupancy/radar': typeof OccupancyRadarRoute
+  '/occupancy/rescue': typeof OccupancyRescueRoute
   '/owner/blocks': typeof OwnerBlocksRoute
   '/owner/insights': typeof OwnerInsightsRoute
   '/owner/inventory': typeof OwnerInventoryRoute
@@ -1095,6 +1148,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/cribbooking': typeof CribbookingIndexRoute
   '/myt': typeof MytIndexRoute
+  '/occupancy': typeof OccupancyIndexRoute
   '/owner': typeof OwnerIndexRoute
   '/property360': typeof Property360IndexRoute
   '/supply-hub': typeof SupplyHubIndexRoute
@@ -1103,6 +1157,8 @@ export interface FileRoutesByTo {
   '/myt/tcm/actions': typeof MytTcmActionsRoute
   '/myt/tcm/performance': typeof MytTcmPerformanceRoute
   '/myt/tour/$id': typeof MytTourIdRouteWithChildren
+  '/occupancy/bed/$bedId': typeof OccupancyBedBedIdRoute
+  '/occupancy/lead/$leadId': typeof OccupancyLeadLeadIdRoute
   '/owner/media/$roomId': typeof OwnerMediaRoomIdRoute
   '/tower/leads/$id': typeof TowerLeadsIdRoute
   '/tower/review/$id': typeof TowerReviewIdRoute
@@ -1201,6 +1257,10 @@ export interface FileRoutesById {
   '/myt/tours': typeof MytToursRoute
   '/myt/war-room': typeof MytWarRoomRoute
   '/myt/zones': typeof MytZonesRoute
+  '/occupancy/inventory': typeof OccupancyInventoryRoute
+  '/occupancy/pipeline': typeof OccupancyPipelineRoute
+  '/occupancy/radar': typeof OccupancyRadarRoute
+  '/occupancy/rescue': typeof OccupancyRescueRoute
   '/owner/blocks': typeof OwnerBlocksRoute
   '/owner/insights': typeof OwnerInsightsRoute
   '/owner/inventory': typeof OwnerInventoryRoute
@@ -1235,6 +1295,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/cribbooking/': typeof CribbookingIndexRoute
   '/myt/': typeof MytIndexRoute
+  '/occupancy/': typeof OccupancyIndexRoute
   '/owner/': typeof OwnerIndexRoute
   '/property360/': typeof Property360IndexRoute
   '/supply-hub/': typeof SupplyHubIndexRoute
@@ -1243,6 +1304,8 @@ export interface FileRoutesById {
   '/myt/tcm/actions': typeof MytTcmActionsRoute
   '/myt/tcm/performance': typeof MytTcmPerformanceRoute
   '/myt/tour/$id': typeof MytTourIdRouteWithChildren
+  '/occupancy/bed/$bedId': typeof OccupancyBedBedIdRoute
+  '/occupancy/lead/$leadId': typeof OccupancyLeadLeadIdRoute
   '/owner/media/$roomId': typeof OwnerMediaRoomIdRoute
   '/tower/leads/$id': typeof TowerLeadsIdRoute
   '/tower/review/$id': typeof TowerReviewIdRoute
@@ -1342,6 +1405,10 @@ export interface FileRouteTypes {
     | '/myt/tours'
     | '/myt/war-room'
     | '/myt/zones'
+    | '/occupancy/inventory'
+    | '/occupancy/pipeline'
+    | '/occupancy/radar'
+    | '/occupancy/rescue'
     | '/owner/blocks'
     | '/owner/insights'
     | '/owner/inventory'
@@ -1376,6 +1443,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/cribbooking/'
     | '/myt/'
+    | '/occupancy/'
     | '/owner/'
     | '/property360/'
     | '/supply-hub/'
@@ -1384,6 +1452,8 @@ export interface FileRouteTypes {
     | '/myt/tcm/actions'
     | '/myt/tcm/performance'
     | '/myt/tour/$id'
+    | '/occupancy/bed/$bedId'
+    | '/occupancy/lead/$leadId'
     | '/owner/media/$roomId'
     | '/tower/leads/$id'
     | '/tower/review/$id'
@@ -1479,6 +1549,10 @@ export interface FileRouteTypes {
     | '/myt/tours'
     | '/myt/war-room'
     | '/myt/zones'
+    | '/occupancy/inventory'
+    | '/occupancy/pipeline'
+    | '/occupancy/radar'
+    | '/occupancy/rescue'
     | '/owner/blocks'
     | '/owner/insights'
     | '/owner/inventory'
@@ -1513,6 +1587,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/cribbooking'
     | '/myt'
+    | '/occupancy'
     | '/owner'
     | '/property360'
     | '/supply-hub'
@@ -1521,6 +1596,8 @@ export interface FileRouteTypes {
     | '/myt/tcm/actions'
     | '/myt/tcm/performance'
     | '/myt/tour/$id'
+    | '/occupancy/bed/$bedId'
+    | '/occupancy/lead/$leadId'
     | '/owner/media/$roomId'
     | '/tower/leads/$id'
     | '/tower/review/$id'
@@ -1618,6 +1695,10 @@ export interface FileRouteTypes {
     | '/myt/tours'
     | '/myt/war-room'
     | '/myt/zones'
+    | '/occupancy/inventory'
+    | '/occupancy/pipeline'
+    | '/occupancy/radar'
+    | '/occupancy/rescue'
     | '/owner/blocks'
     | '/owner/insights'
     | '/owner/inventory'
@@ -1652,6 +1733,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/cribbooking/'
     | '/myt/'
+    | '/occupancy/'
     | '/owner/'
     | '/property360/'
     | '/supply-hub/'
@@ -1660,6 +1742,8 @@ export interface FileRouteTypes {
     | '/myt/tcm/actions'
     | '/myt/tcm/performance'
     | '/myt/tour/$id'
+    | '/occupancy/bed/$bedId'
+    | '/occupancy/lead/$leadId'
     | '/owner/media/$roomId'
     | '/tower/leads/$id'
     | '/tower/review/$id'
@@ -1742,6 +1826,10 @@ export interface RootRouteChildren {
   MytToursRoute: typeof MytToursRoute
   MytWarRoomRoute: typeof MytWarRoomRoute
   MytZonesRoute: typeof MytZonesRoute
+  OccupancyInventoryRoute: typeof OccupancyInventoryRoute
+  OccupancyPipelineRoute: typeof OccupancyPipelineRoute
+  OccupancyRadarRoute: typeof OccupancyRadarRoute
+  OccupancyRescueRoute: typeof OccupancyRescueRoute
   OwnerBlocksRoute: typeof OwnerBlocksRoute
   OwnerInsightsRoute: typeof OwnerInsightsRoute
   OwnerInventoryRoute: typeof OwnerInventoryRoute
@@ -1758,11 +1846,14 @@ export interface RootRouteChildren {
   SupplyHubVerifyRoute: typeof SupplyHubVerifyRoute
   CribbookingIndexRoute: typeof CribbookingIndexRoute
   MytIndexRoute: typeof MytIndexRoute
+  OccupancyIndexRoute: typeof OccupancyIndexRoute
   OwnerIndexRoute: typeof OwnerIndexRoute
   Property360IndexRoute: typeof Property360IndexRoute
   SupplyHubIndexRoute: typeof SupplyHubIndexRoute
   MytFeedbackIdRoute: typeof MytFeedbackIdRoute
   MytTourIdRoute: typeof MytTourIdRouteWithChildren
+  OccupancyBedBedIdRoute: typeof OccupancyBedBedIdRoute
+  OccupancyLeadLeadIdRoute: typeof OccupancyLeadLeadIdRoute
   OwnerMediaRoomIdRoute: typeof OwnerMediaRoomIdRoute
 }
 
@@ -2160,6 +2251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/occupancy/': {
+      id: '/occupancy/'
+      path: '/occupancy'
+      fullPath: '/occupancy/'
+      preLoaderRoute: typeof OccupancyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/myt/': {
       id: '/myt/'
       path: '/myt'
@@ -2396,6 +2494,34 @@ declare module '@tanstack/react-router' {
       path: '/owner/blocks'
       fullPath: '/owner/blocks'
       preLoaderRoute: typeof OwnerBlocksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/occupancy/rescue': {
+      id: '/occupancy/rescue'
+      path: '/occupancy/rescue'
+      fullPath: '/occupancy/rescue'
+      preLoaderRoute: typeof OccupancyRescueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/occupancy/radar': {
+      id: '/occupancy/radar'
+      path: '/occupancy/radar'
+      fullPath: '/occupancy/radar'
+      preLoaderRoute: typeof OccupancyRadarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/occupancy/pipeline': {
+      id: '/occupancy/pipeline'
+      path: '/occupancy/pipeline'
+      fullPath: '/occupancy/pipeline'
+      preLoaderRoute: typeof OccupancyPipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/occupancy/inventory': {
+      id: '/occupancy/inventory'
+      path: '/occupancy/inventory'
+      fullPath: '/occupancy/inventory'
+      preLoaderRoute: typeof OccupancyInventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/myt/zones': {
@@ -2692,6 +2818,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerMediaRoomIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/occupancy/lead/$leadId': {
+      id: '/occupancy/lead/$leadId'
+      path: '/occupancy/lead/$leadId'
+      fullPath: '/occupancy/lead/$leadId'
+      preLoaderRoute: typeof OccupancyLeadLeadIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/occupancy/bed/$bedId': {
+      id: '/occupancy/bed/$bedId'
+      path: '/occupancy/bed/$bedId'
+      fullPath: '/occupancy/bed/$bedId'
+      preLoaderRoute: typeof OccupancyBedBedIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/myt/tour/$id': {
       id: '/myt/tour/$id'
       path: '/myt/tour/$id'
@@ -2939,6 +3079,10 @@ const rootRouteChildren: RootRouteChildren = {
   MytToursRoute: MytToursRoute,
   MytWarRoomRoute: MytWarRoomRoute,
   MytZonesRoute: MytZonesRoute,
+  OccupancyInventoryRoute: OccupancyInventoryRoute,
+  OccupancyPipelineRoute: OccupancyPipelineRoute,
+  OccupancyRadarRoute: OccupancyRadarRoute,
+  OccupancyRescueRoute: OccupancyRescueRoute,
   OwnerBlocksRoute: OwnerBlocksRoute,
   OwnerInsightsRoute: OwnerInsightsRoute,
   OwnerInventoryRoute: OwnerInventoryRoute,
@@ -2955,11 +3099,14 @@ const rootRouteChildren: RootRouteChildren = {
   SupplyHubVerifyRoute: SupplyHubVerifyRoute,
   CribbookingIndexRoute: CribbookingIndexRoute,
   MytIndexRoute: MytIndexRoute,
+  OccupancyIndexRoute: OccupancyIndexRoute,
   OwnerIndexRoute: OwnerIndexRoute,
   Property360IndexRoute: Property360IndexRoute,
   SupplyHubIndexRoute: SupplyHubIndexRoute,
   MytFeedbackIdRoute: MytFeedbackIdRoute,
   MytTourIdRoute: MytTourIdRouteWithChildren,
+  OccupancyBedBedIdRoute: OccupancyBedBedIdRoute,
+  OccupancyLeadLeadIdRoute: OccupancyLeadLeadIdRoute,
   OwnerMediaRoomIdRoute: OwnerMediaRoomIdRoute,
 }
 export const routeTree = rootRouteImport

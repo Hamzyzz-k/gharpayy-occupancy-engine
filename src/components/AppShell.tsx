@@ -4,7 +4,7 @@ import {
   Building2, Search, Sun, Command, Trophy, Sparkles, MessageSquare,
   IndianRupee, MapPin, Zap, Users, Home, Calendar, Store, Swords, Settings, AlertTriangle,
   ShieldCheck, Inbox, Camera, HelpCircle, Layers, HeartPulse, ClipboardCheck, ListChecks, Timer,
-  Compass,
+  Compass, Gauge, Radar, Flame, BedDouble,
 } from "lucide-react";
 import { NotificationCenter } from "./NotificationCenter";
 import { ProfileMenu } from "./ProfileMenu";
@@ -94,6 +94,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const navByRole: Record<typeof role, NavItem[]> = {
     hr: [
+      // --- Occupancy Engine: the five routes backed by a real Postgres schema ---
+      { to: "/occupancy", label: "Occupancy Engine", icon: Gauge, accent: true },
+      { to: "/occupancy/radar", label: "Vacancy Radar", icon: Radar, accent: true },
+      { to: "/occupancy/rescue", label: "Rescue List", icon: Flame, accent: true },
+      { to: "/occupancy/pipeline", label: "Lead Pipeline", icon: Users, accent: true },
+      { to: "/occupancy/inventory", label: "Bed Inventory", icon: BedDouble, accent: true },
       { to: "/os", label: "Closing OS", icon: Sparkles, accent: true },
       { to: "/coach", label: "Coach", icon: Sparkles, accent: true },
       { to: "/today", label: "Today", icon: Sun, badge: queue.length },
@@ -152,6 +158,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       { to: "/help", label: "How to use", icon: HelpCircle },
     ],
     "flow-ops": [
+      // --- Occupancy Engine: the five routes backed by a real Postgres schema ---
+      { to: "/occupancy", label: "Occupancy Engine", icon: Gauge, accent: true },
+      { to: "/occupancy/radar", label: "Vacancy Radar", icon: Radar, accent: true },
+      { to: "/occupancy/rescue", label: "Rescue List", icon: Flame, accent: true },
+      { to: "/occupancy/pipeline", label: "Lead Pipeline", icon: Users, accent: true },
+      { to: "/occupancy/inventory", label: "Bed Inventory", icon: BedDouble, accent: true },
       { to: "/os", label: "Closing OS", icon: Sparkles, accent: true },
       { to: "/coach", label: "Coach", icon: Sparkles, accent: true },
       { to: "/today", label: "Today", icon: Sun, badge: queue.length },
@@ -209,6 +221,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       { to: "/help", label: "How to use", icon: HelpCircle },
     ],
     tcm: [
+      // --- Occupancy Engine: the five routes backed by a real Postgres schema ---
+      { to: "/occupancy", label: "Occupancy Engine", icon: Gauge, accent: true },
+      { to: "/occupancy/radar", label: "Vacancy Radar", icon: Radar, accent: true },
+      { to: "/occupancy/rescue", label: "Rescue List", icon: Flame, accent: true },
+      { to: "/occupancy/pipeline", label: "Lead Pipeline", icon: Users, accent: true },
+      { to: "/occupancy/inventory", label: "Bed Inventory", icon: BedDouble, accent: true },
       { to: "/os", label: "Closing OS", icon: Sparkles, accent: true },
       { to: "/coach", label: "Coach", icon: Sparkles, accent: true },
       { to: "/today", label: "Today", icon: Sun, badge: queue.length },
