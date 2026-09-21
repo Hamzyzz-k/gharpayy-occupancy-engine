@@ -3,7 +3,7 @@
 An assignment submission for Gharpayy, built on top of
 [`Gharpayytechy/a3x-gg`](https://github.com/Gharpayytechy/a3x-gg).
 
-**Live:** _(deployed URL)_
+**Live:** https://gharpayy-occupancy-engine.vercel.app
 
 ---
 
