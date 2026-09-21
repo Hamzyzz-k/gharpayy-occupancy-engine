@@ -1,4 +1,4 @@
-# Gharpayy — Occupancy Engine
+# Gharpayy Occupancy Engine
 
 An assignment submission for Gharpayy, built on top of
 [`Gharpayytechy/a3x-gg`](https://github.com/Gharpayytechy/a3x-gg).
@@ -25,12 +25,12 @@ I spent the first hour reading the repo rather than writing code:
 | `drizzle/schema.ts` | *"auto-generated and intentionally left blank"* |
 | Files touching Supabase | 46 of 780 |
 
-It's a well-built UI shell with almost no backend underneath it — most screens
+It's a well-built UI shell with almost no backend underneath it: most screens
 render mock or randomised data. Their own README says *"remove Property Command
 Center random data."*
 
 That's what I took **"with some backend"** to mean, and it set the strategy:
-**don't activate 96 half-working routes — make five of them real, end to end.**
+**don't activate 96 half-working routes; make five of them real, end to end.**
 
 Two other things worth flagging:
 
@@ -45,7 +45,7 @@ Two other things worth flagging:
 
 ## The idea
 
-> **Gharpayy doesn't sell leads. It sells bed-nights — and a bed-night is the
+> **Gharpayy doesn't sell leads. It sells bed-nights, and a bed-night is the
 > most perishable inventory there is.**
 
 An empty bed last night can never be sold again. It's an airline seat after
@@ -53,7 +53,7 @@ takeoff. Airlines and hotels built an entire discipline around that fact forty
 years ago; PG operators still run on lead lists.
 
 So this isn't a lead CRM. It's an **occupancy engine**, and its home screen
-isn't "how many leads this month" — it's **how many rupees are leaking right
+isn't "how many leads this month". It's **how many rupees are leaking right
 now, which beds, and who can fill each one.**
 
 ---
@@ -70,12 +70,12 @@ now, which beds, and who can fill each one.**
 
 ### 2 new ideas
 
-**1. The Match Engine — and it runs in both directions**
+**1. The Match Engine, and it runs in both directions**
 
-A scoring function (0–100) over budget, locality, availability and sharing type,
-with gender as a hard filter rather than a score. Plain arithmetic, not AI —
-deliberately, because every point has to be explainable to a customer on a phone
-call.
+A scoring function (0 to 100) over budget, locality, availability and sharing
+type. Gender, and rent more than 10% over budget, are hard filters rather than
+scores. Plain arithmetic, not AI, deliberately: every point has to be
+explainable to a customer on a phone call.
 
 - `/occupancy/lead/:id` → the best beds for this lead *(what every CRM does)*
 - `/occupancy/bed/:id` → **the best leads for this bed** *(what almost none do)*
@@ -88,7 +88,7 @@ model the product as a *lead* CRM the lead is always the starting point.
 `/occupancy` and `/occupancy/radar`.
 
 Revenue at Risk is `(monthly_rent / 30) × days_vacant`, summed across every
-empty bed — computed in Postgres, not the browser.
+empty bed, computed in Postgres rather than the browser.
 
 The Radar is the part I care about more: **a bed becomes sellable inventory the
 moment a tenant gives notice, not the day it empties.** So it shows a 60-day
@@ -142,12 +142,12 @@ leads ──< activities
 leads ──< tasks
 ```
 
-`supabase/migrations/0001_occupancy_engine.sql` — schema, indexes (including a
+`supabase/migrations/0001_occupancy_engine.sql`: schema, indexes (including a
 GIN index on the preferred-localities array), RLS on all seven tables, and a
 `bed_availability` view that computes `available_from`, `days_vacant` and
 `revenue_lost` in SQL.
 
-`supabase/migrations/0002_seed_demo_data.sql` — 8 properties, ~120 beds, ~150
+`supabase/migrations/0002_seed_demo_data.sql`: 8 properties, ~120 beds, ~150
 leads, tenancies, activity history and tasks. All dated relative to
 `current_date`, so the demo never goes stale.
 
@@ -155,10 +155,12 @@ leads, tenancies, activity history and tasks. All dated relative to
 property or a room. You cannot answer "what's actually available on the 5th?"
 from property-level data.
 
-**On scale:** matching runs as an indexed Postgres query rather than in the
-browser, so it behaves the same at 120 beds or 12,000. If scoring grows heavier
-it becomes a materialised view refreshed on bed/lead change rather than computed
-per request.
+**On scale:** the expensive facts (which beds are free, from when, for how long,
+and what they have cost) are computed in Postgres over indexed columns, so they
+don't grow with how much the browser has loaded. Match scoring currently runs in
+the browser over those rows, which is fine at this size. At a few thousand beds
+it would move into the database, for example as a view refreshed when a bed or
+lead changes.
 
 ---
 
@@ -186,22 +188,22 @@ NODE_OPTIONS=--max-old-space-size=8192 npm run build
 **WhatsApp ingestion.** Every lead in this market actually arrives on WhatsApp,
 and that context currently lives in a salesperson's personal phone. Parse those
 threads into `activities` automatically and the CRM stops depending on people
-remembering to log things — which they never do.
+remembering to log things, which they never do.
 
 After that: real auth with RLS scoped to staff roles (the policies are the only
-thing that needs to change — RLS is already on), and code-splitting the route
+thing that needs to change, since RLS is already on), and code-splitting the route
 tree so the build stops needing 8GB.
 
 ---
 
 ## Honest notes
 
-- Built fast, with modern tooling. The work that mattered wasn't typing speed —
+- Built fast, with modern tooling. The work that mattered wasn't typing speed:
   it was deciding what *not* to build, and modelling beds as the unit of
   inventory.
 - The other ~91 routes are untouched and still on mock data. That was
   deliberate, not unfinished.
-- Auth is not wired up — RLS policies are currently open for the demo. That's
+- Auth is not wired up: RLS policies are currently open for the demo. That's
   the first thing I'd close.
 
 _Original project README preserved as `README-original.md`._
