@@ -67,11 +67,15 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   notFoundComponent: NotFoundComponent,
 });
 
+// Applies the saved theme before first paint, so dark mode doesn't flash white on load.
+const THEME_BOOT = `try{if(localStorage.getItem('gharpayy-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`;
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
       </head>
       <body>
         {children}

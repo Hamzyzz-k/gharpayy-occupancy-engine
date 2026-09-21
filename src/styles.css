@@ -128,12 +128,13 @@
   --secondary-foreground: oklch(0.92 0.005 250);
   --muted: oklch(0.245 0.012 260);
   --muted-foreground: oklch(0.62 0.012 260);
-  --accent: #0943a0;
+  /* Brand blue is too dark to read on near-black, so dark mode uses a lighter step of it. */
+  --accent: #4a86e8;
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.585 0.22 27);
   --border: oklch(0.28 0.012 260);
   --input: oklch(0.28 0.012 260);
-  --ring: #0943a0;
+  --ring: #4a86e8;
 }
 
 @layer base {
@@ -162,4 +163,109 @@
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Occupancy screens: light and dark values for the Gharpayy palette.
+   Brand blue #0943a0 and yellow #f4c024 stay fixed as fills in both modes;
+   blue text lightens in dark mode so it stays readable on dark cards.
+   --------------------------------------------------------------------------- */
+:root {
+  --oc-text: #171b20;
+  --oc-text-2: #646971;
+  --oc-text-3: #8b8f95;
+  --oc-faint: #c9c2bc;
+
+  --oc-card: #ffffff;
+  --oc-sunken: #fcf9f7;
+  --oc-chip: #f5f2ee;
+  --oc-shimmer: #f0ebe6;
+  --oc-border: #e4e0dd;
+  --oc-divider: #f0ece8;
+  --oc-hover: #f6f8fc;
+
+  --oc-brand: #0943a0;
+  --oc-brand-soft: #eaf0fa;
+  --oc-brand-line: #c7d6ee;
+
+  --oc-cream: #fdf8e6;
+  --oc-cream-line: #ecdca0;
+  --oc-cream-text: #5c4a12;
+  --oc-yellow-soft: #fdf3cf;
+  --oc-yellow-text: #8a6a00;
+
+  --oc-red: #d53a35;
+  --oc-red-soft: #fff0ee;
+  --oc-red-line: #f5c6c2;
+  --oc-red-text: #8a4a45;
+  --oc-green: #24805b;
+  --oc-green-soft: #edf8f1;
+  --oc-green-soft-2: #d9f2e3;
+  --oc-amber: #c98218;
+  --oc-amber-soft: #fff7e7;
+  --oc-teal: #237a86;
+  --oc-teal-soft: #e6f4f5;
+  --oc-purple: #7457a8;
+  --oc-purple-soft: #f3effb;
+
+  --oc-ink: #171b20;
+  --oc-ink-fg: #ffffff;
+  --oc-ink-hover: #2b3037;
+
+  --oc-chart-1: #0943a0;
+  --oc-chart-2: #1f5bb8;
+  --oc-chart-3: #3a73c9;
+  --oc-chart-4: #5b8dd6;
+  --oc-chart-5: #86abe3;
+  --oc-chart-6: #aec7ee;
+}
+
+.dark {
+  --oc-text: #eef1f5;
+  --oc-text-2: #a8aeb6;
+  --oc-text-3: #858c95;
+  --oc-faint: #4b515a;
+
+  --oc-card: #161a21;
+  --oc-sunken: #10141a;
+  --oc-chip: #232831;
+  --oc-shimmer: #1f242c;
+  --oc-border: #2a3039;
+  --oc-divider: #232932;
+  --oc-hover: #1b2230;
+
+  --oc-brand: #8fb0ee;
+  --oc-brand-soft: #172640;
+  --oc-brand-line: #2c4270;
+
+  --oc-cream: #29230f;
+  --oc-cream-line: #4d4119;
+  --oc-cream-text: #ecd78f;
+  --oc-yellow-soft: #2e2711;
+  --oc-yellow-text: #f4c024;
+
+  --oc-red: #ff7d76;
+  --oc-red-soft: #3a1a1c;
+  --oc-red-line: #5c2a2c;
+  --oc-red-text: #f3aca7;
+  --oc-green: #62d59e;
+  --oc-green-soft: #13291f;
+  --oc-green-soft-2: #1a3a2b;
+  --oc-amber: #f2b75a;
+  --oc-amber-soft: #2d2413;
+  --oc-teal: #6fcad4;
+  --oc-teal-soft: #0f2a2e;
+  --oc-purple: #b89ce8;
+  --oc-purple-soft: #241c35;
+
+  --oc-ink: #eef1f5;
+  --oc-ink-fg: #10141a;
+  --oc-ink-hover: #d6dbe2;
+
+  --oc-chart-1: #4a86e8;
+  --oc-chart-2: #5f95ec;
+  --oc-chart-3: #78a6ef;
+  --oc-chart-4: #93b8f2;
+  --oc-chart-5: #adc9f5;
+  --oc-chart-6: #c6dbf8;
 }

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { NotificationCenter } from "./NotificationCenter";
 import { ProfileMenu } from "./ProfileMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { useApp } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -433,9 +434,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Command className="h-2.5 w-2.5" />K
             </kbd>
           </button>
-          <div className="ml-auto flex items-center gap-2">
-            <LiveActivityDock />
-            <PipButton />
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            {/* Too wide for phone and tablet headers alongside the search bar; shown from lg up. */}
+            <div className="hidden items-center gap-2 lg:flex">
+              <LiveActivityDock />
+              <PipButton />
+            </div>
+            <ThemeToggle />
             <NotificationCenter role={role} />
             <ProfileMenu />
           </div>
