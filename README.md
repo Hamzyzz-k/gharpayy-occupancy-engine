@@ -34,9 +34,11 @@ That's what I took **"with some backend"** to mean, and it set the strategy:
 
 Two other things worth flagging:
 
-- **`.env` is committed to the public repo**, with live Supabase credentials.
-  I didn't use them. This project runs against its own Supabase project, and
-  `.env` is now gitignored here with a `.env.example` in its place.
+- **The original repo commits `.env`**, with live Supabase credentials, to a
+  public repository. I didn't use them: this project runs against its own
+  Supabase project, and `.env` is gitignored here with a `.env.example` in its
+  place. The old keys should still be rotated, since removing the file doesn't
+  remove it from git history.
 - **The build runs out of memory on a default Node heap.** Rollup needs
   `NODE_OPTIONS=--max-old-space-size=8192` to bundle 780 files, otherwise it
   dies with `FATAL ERROR: JavaScript heap out of memory`.
@@ -65,7 +67,7 @@ now, which beds, and who can fill each one.**
 | Module | Route | What's real about it |
 |---|---|---|
 | **Lead Pipeline** | `/occupancy/pipeline` | 150 leads from Postgres, live funnel counts, search and stage filters. Stage changes persist and write an audit row. |
-| **Bed Inventory** | `/occupancy/inventory` | Property → room → bed, sorted worst-occupancy-first, with live availability and idle-rent per property. |
+| **Bed Inventory** | `/occupancy/inventory` | Property → room → bed, sorted worst-occupancy-first, with live availability and rent missed per property. |
 | **Follow-ups** | `/occupancy/rescue` | Real tasks you can complete, plus a ranked Rescue List of who to call today. |
 
 ### 2 new ideas
@@ -87,16 +89,16 @@ model the product as a *lead* CRM the lead is always the starting point.
 
 `/occupancy` and `/occupancy/radar`.
 
-Revenue at Risk is `(monthly_rent / 30) × days_vacant`, summed across every
-empty bed, computed in Postgres rather than the browser.
+Revenue at Risk (on screen, "Money lost to empty beds") is
+`(monthly_rent / 30) × days_vacant`, summed across every empty bed and computed
+in Postgres rather than the browser.
 
 The Radar is the part I care about more: **a bed becomes sellable inventory the
 moment a tenant gives notice, not the day it empties.** So it shows a 60-day
 forward view of beds about to open up, each already pre-matched to waiting
-leads. Closing a 20-day vacancy gap on ~40 beds a month is roughly ₹2.2L/month
-recovered.
-
----
+leads. As an illustration: if around 40 beds turn over a month, cutting the
+empty gap from 20 days to 2 at about ₹300 a bed-night recovers roughly
+₹2.2L a month. The real figure depends on actual turnover and rents.
 
 ### The Rescue List scoring
 
@@ -134,7 +136,7 @@ keeps urgency in charge: 20 critical, 38 warm, 56 fine, 9 gone cold.
 
 ## The backend
 
-Seven tables, indexed on exactly the columns the match engine filters by:
+Seven tables, indexed on the columns the availability view and screens query by:
 
 ```
 properties ──< rooms ──< beds ──< tenancies
@@ -147,8 +149,8 @@ GIN index on the preferred-localities array), RLS on all seven tables, and a
 `bed_availability` view that computes `available_from`, `days_vacant` and
 `revenue_lost` in SQL.
 
-`supabase/migrations/0002_seed_demo_data.sql`: 8 properties, ~120 beds, ~150
-leads, tenancies, activity history and tasks. All dated relative to
+`supabase/migrations/0002_seed_demo_data.sql`: 8 properties, roughly 100 to 130
+beds (the layout is randomised), 150 leads, tenancies, activity history and tasks. All dated relative to
 `current_date`, so the demo never goes stale.
 
 **The key modelling decision:** the unit of inventory is a **bed**, not a
@@ -192,7 +194,7 @@ remembering to log things, which they never do.
 
 After that: real auth with RLS scoped to staff roles (the policies are the only
 thing that needs to change, since RLS is already on), and code-splitting the route
-tree so the build stops needing 8GB.
+tree so the build no longer needs a raised memory limit.
 
 ---
 
