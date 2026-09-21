@@ -60,8 +60,9 @@
 }
 
 :root {
-  /* Brand colours from gharpayy.com: blue #0943a0 for primary and accent,
-     yellow #f4c024 (their --primary-theme-color) on the dark sidebar. */
+  /* Brand colours from gharpayy.com: blue #0943a0 for primary and accent.
+     The sidebar follows the theme: blue highlights when light, yellow
+     #f4c024 (their --primary-theme-color) when dark. */
   --radius: 0.75rem;
 
   --background: oklch(0.985 0.004 60);
@@ -99,14 +100,15 @@
   --intent-warm: oklch(0.78 0.16 75);
   --intent-cold: oklch(0.66 0.12 245);
 
-  --sidebar: oklch(0.21 0.012 260);
-  --sidebar-foreground: oklch(0.86 0.006 260);
-  --sidebar-primary: #f4c024;
-  --sidebar-primary-foreground: #171b20;
-  --sidebar-accent: oklch(0.28 0.012 260);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.3 0.012 260);
-  --sidebar-ring: #f4c024;
+  /* Light sidebar: brand blue highlights, since yellow text can't be read on white. */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #3c4248;
+  --sidebar-primary: #0943a0;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef3fb;
+  --sidebar-accent-foreground: #0943a0;
+  --sidebar-border: #e8e4e0;
+  --sidebar-ring: #0943a0;
 
   --chart-1: #0943a0;
   --chart-2: oklch(0.62 0.14 155);
@@ -129,6 +131,14 @@
   --muted: oklch(0.245 0.012 260);
   --muted-foreground: oklch(0.62 0.012 260);
   /* Brand blue is too dark to read on near-black, so dark mode uses a lighter step of it. */
+  --sidebar: oklch(0.21 0.012 260);
+  --sidebar-foreground: oklch(0.86 0.006 260);
+  --sidebar-primary: #f4c024;
+  --sidebar-primary-foreground: #171b20;
+  --sidebar-accent: oklch(0.28 0.012 260);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.3 0.012 260);
+  --sidebar-ring: #f4c024;
   --accent: #4a86e8;
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.585 0.22 27);
