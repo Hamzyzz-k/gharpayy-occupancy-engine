@@ -1,15 +1,23 @@
 /**
- * The Rescue List: lead decay, weighted by move-in urgency.
+ * The Rescue List: who to contact today, and why.
  *
- * Most CRMs sort follow-ups by "last contacted" and get this exactly backwards.
- * Two days of silence means completely different things:
+ * Leads are lost to silence, not refusals. But silence alone is a poor
+ * signal. Two days of it means nothing for someone moving in three months and
+ * everything for someone moving in five days. So urgency leads, and silence
+ * adds to it:
  *
- *   moving in 5 days,   silent 2 days  ->  emergency
- *   moving in 3 months, silent 2 days  ->  entirely fine
+ *   risk = urgency (up to 55) + silence (up to 35) + stage (up to 10)
  *
- * So we decay by silence, then multiply by how soon they need a bed and how
- * far down the pipeline they already are. A lead who has already visited and
- * gone quiet is a much more expensive loss than one who just enquired.
+ * The parts are added, not multiplied. An earlier version multiplied them,
+ * and ten days of silence alone could push any lead to the cap: on real data
+ * that marked 62 of 123 active leads critical, 46 of them tied at 100, with a
+ * lead silent for six weeks and moving in seven ranked level with one moving
+ * in four days. Adding keeps urgency in charge and leaves room between scores.
+ *
+ * Silence stops counting at two weeks. Six weeks isn't three times worse than
+ * two, it means the lead has gone cold, which is a different problem from an
+ * urgent one. Those leads are banded separately so they don't crowd the call
+ * list.
  */
 
 import type { Lead } from './types'
@@ -18,23 +26,40 @@ import { STAGE_LABELS } from './types'
 /** Leads no longer in the market, so nothing to rescue. */
 const CLOSED_STAGES = ['booked', 'moved_in', 'lost']
 
-/** Later pipeline stages have more sunk effort, so silence costs more. */
-const STAGE_MULTIPLIER: Record<string, number> = {
-  new: 1.0,
-  contacted: 1.15,
-  visit_scheduled: 1.35,
-  visited: 1.45,
-  negotiation: 1.6,
+/** Later stages carry more sunk effort, so losing them costs more. */
+const STAGE_POINTS: Record<string, number> = {
+  new: 0,
+  contacted: 3,
+  visit_scheduled: 6,
+  visited: 8,
+  negotiation: 10,
 }
 
+/** Silence stops adding risk after this many days. */
+const SILENCE_CAP_DAYS = 14
+const SILENCE_MAX_POINTS = 35
+
+/** A never-contacted lead counts as a few days quieter than one reached once. */
+const NEVER_CONTACTED_EXTRA_DAYS = 3
+
+/** Silent this long, with no move-in inside the same window, means gone cold. */
+const COLD_AFTER_DAYS = 21
+
+export const CRITICAL_AT = 70
+export const WARM_AT = 45
+
+export type RescueBand = 'critical' | 'warm' | 'ok' | 'cold'
+
 export interface RescueScore {
-  /** 0-100. Higher = call them sooner. */
+  /** 0-100. Higher = contact them sooner. */
   risk: number
-  band: 'critical' | 'warm' | 'ok'
+  band: RescueBand
   daysSinceContact: number
   daysToMoveIn: number | null
-  /** Short human sentences explaining the score, for the UI. */
+  /** Short plain sentences explaining the score, for the UI. */
   reasons: string[]
+  /** Unrounded score plus tie-breakers, used only for ordering. */
+  sortKey: [number, number, number]
 }
 
 function daysSince(iso: string | null | undefined): number | null {
@@ -42,58 +67,84 @@ function daysSince(iso: string | null | undefined): number | null {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000)
 }
 
-function urgencyMultiplier(daysToMoveIn: number | null): { mul: number; note: string } {
-  if (daysToMoveIn === null) return { mul: 1.0, note: 'No move-in date on record' }
-  if (daysToMoveIn < 0)
-    return { mul: 2.2, note: `Move-in date passed ${Math.abs(daysToMoveIn)} days ago` }
-  if (daysToMoveIn <= 7) return { mul: 3.0, note: `Needs a bed in ${daysToMoveIn} days` }
-  if (daysToMoveIn <= 14) return { mul: 2.0, note: `Moving in ${daysToMoveIn} days` }
-  if (daysToMoveIn <= 30) return { mul: 1.3, note: `Moving in ${daysToMoveIn} days` }
-  return { mul: 0.8, note: `Not moving for ${daysToMoveIn} days` }
+function urgency(daysToMoveIn: number | null): { points: number; note: string } {
+  if (daysToMoveIn === null) return { points: 15, note: 'No move-in date on record' }
+  if (daysToMoveIn < 0) {
+    const ago = Math.abs(daysToMoveIn)
+    return {
+      points: 30,
+      note: `Move-in date passed ${ago} day${ago === 1 ? '' : 's'} ago, check they still need a bed`,
+    }
+  }
+  if (daysToMoveIn <= 7) {
+    return {
+      points: 55,
+      note: daysToMoveIn === 0 ? 'Needs a bed today' : `Needs a bed in ${daysToMoveIn} days`,
+    }
+  }
+  if (daysToMoveIn <= 14) return { points: 42, note: `Moving in ${daysToMoveIn} days` }
+  if (daysToMoveIn <= 30) return { points: 25, note: `Moving in ${daysToMoveIn} days` }
+  return { points: 8, note: `Not moving for ${daysToMoveIn} days` }
 }
 
 export function rescueScore(lead: Lead): RescueScore {
   const reasons: string[] = []
 
-  // Never contacted? Measure silence from when they came in. That's worse,
-  // not better, than a lead who was contacted once and went quiet.
   const sinceContact = daysSince(lead.last_contacted_at)
   const sinceCreated = daysSince(lead.created_at) ?? 0
+  const never = sinceContact === null
   const daysSinceContact = sinceContact ?? sinceCreated
-
-  if (sinceContact === null) {
-    reasons.push(`Never contacted, sitting for ${sinceCreated} days`)
-  } else {
-    reasons.push(
-      daysSinceContact === 0
-        ? 'Contacted today'
-        : `Silent for ${daysSinceContact} day${daysSinceContact === 1 ? '' : 's'}`,
-    )
-  }
+  const effectiveSilence = daysSinceContact + (never ? NEVER_CONTACTED_EXTRA_DAYS : 0)
 
   const daysToMoveIn = lead.move_in_date
     ? Math.ceil((new Date(lead.move_in_date).getTime() - Date.now()) / 86_400_000)
     : null
 
-  const { mul: urgencyMul, note } = urgencyMultiplier(daysToMoveIn)
-  reasons.push(note)
+  const cold =
+    effectiveSilence >= COLD_AFTER_DAYS && (daysToMoveIn === null || daysToMoveIn > COLD_AFTER_DAYS)
 
-  const stageMul = STAGE_MULTIPLIER[lead.stage] ?? 1.0
-  if (stageMul >= 1.35) {
-    reasons.push(`Already at "${STAGE_LABELS[lead.stage]}", expensive to lose`)
+  const u = urgency(daysToMoveIn)
+  const silencePoints =
+    (Math.min(effectiveSilence, SILENCE_CAP_DAYS) / SILENCE_CAP_DAYS) * SILENCE_MAX_POINTS
+  const stagePoints = STAGE_POINTS[lead.stage] ?? 0
+  const raw = u.points + silencePoints + stagePoints
+
+  if (cold) {
+    reasons.push(
+      `Gone cold: no contact in ${daysSinceContact} days${never ? ', never reached' : ''}`,
+    )
+    reasons.push(u.note)
+  } else {
+    if (never) {
+      reasons.push(`Never contacted, waiting ${sinceCreated} day${sinceCreated === 1 ? '' : 's'}`)
+    } else if (daysSinceContact === 0) {
+      reasons.push('Contacted today')
+    } else {
+      reasons.push(`Silent for ${daysSinceContact} day${daysSinceContact === 1 ? '' : 's'}`)
+    }
+    reasons.push(u.note)
+    if (stagePoints >= STAGE_POINTS.visit_scheduled!) {
+      reasons.push(`Already at "${STAGE_LABELS[lead.stage]}", expensive to lose`)
+    }
   }
 
-  // Never-contacted leads carry a penalty floor so a brand-new lead that nobody
-  // has touched still surfaces on day one.
-  const base = daysSinceContact * 7 + (sinceContact === null ? 18 : 0)
-  const risk = Math.max(0, Math.min(100, Math.round(base * urgencyMul * stageMul)))
+  const band: RescueBand = cold
+    ? 'cold'
+    : raw >= CRITICAL_AT
+      ? 'critical'
+      : raw >= WARM_AT
+        ? 'warm'
+        : 'ok'
 
   return {
-    risk,
-    band: risk >= 70 ? 'critical' : risk >= 40 ? 'warm' : 'ok',
+    risk: Math.round(raw),
+    band,
     daysSinceContact,
     daysToMoveIn,
     reasons,
+    // Silence stops scoring at two weeks, so equal scores are common among the
+    // quietest leads. Break ties by who has waited longer, then who moves sooner.
+    sortKey: [raw, effectiveSilence, -(daysToMoveIn ?? 999)],
   }
 }
 
@@ -101,12 +152,23 @@ export interface RescueItem extends RescueScore {
   lead: Lead
 }
 
-/** Today's ranked "who to save" list. The software decides; the human executes. */
+function byUrgency(a: RescueItem, b: RescueItem): number {
+  for (let i = 0; i < 3; i++) {
+    const d = b.sortKey[i]! - a.sortKey[i]!
+    if (d !== 0) return d
+  }
+  return 0
+}
+
+/**
+ * Every lead still in the market, ranked. Gone-cold leads sort after the rest,
+ * because they need a different kind of attention from today's calls.
+ */
 export function buildRescueList(leads: Lead[], limit = 25): RescueItem[] {
-  return leads
+  const scored = leads
     .filter((l) => !CLOSED_STAGES.includes(l.stage))
     .map((lead) => ({ lead, ...rescueScore(lead) }))
-    .filter((r) => r.risk > 0)
-    .sort((a, b) => b.risk - a.risk)
-    .slice(0, limit)
+  const active = scored.filter((r) => r.band !== 'cold').sort(byUrgency)
+  const cold = scored.filter((r) => r.band === 'cold').sort(byUrgency)
+  return [...active, ...cold].slice(0, limit)
 }
