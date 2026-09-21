@@ -128,7 +128,7 @@ function BedPage() {
         {/* ---- Hero ------------------------------------------------------- */}
         <section className="relative overflow-hidden rounded-3xl bg-[#0943a0] p-5 text-white shadow-[0_16px_34px_rgba(9,67,160,0.28)] sm:p-7">
           <div className="absolute -right-10 -top-16 h-60 w-60 rounded-full border-[36px] border-[#f4c024]/25" />
-          <div className="relative grid gap-7 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          <div className="relative grid grid-cols-1 gap-7 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-center">
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span
@@ -147,7 +147,7 @@ function BedPage() {
                 </span>
               </div>
               <p className="mt-5 flex items-center gap-2 text-sm text-white/75">
-                <MapPin className="h-4 w-4 shrink-0 text-[#0943a0]" />
+                <MapPin className="h-4 w-4 shrink-0 text-[var(--oc-brand)]" />
                 {bed.property_name} · {bed.locality}
               </p>
               <div className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -186,7 +186,7 @@ function BedPage() {
                   </div>
                   <div className="mt-5 border-t border-white/10 pt-4">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-white/65">Cost of one more empty day</span>
+                      <span className="text-white/65">Each extra empty day costs</span>
                       <span className="font-bold text-white">{inr(perDay)}</span>
                     </div>
                     <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
@@ -223,11 +223,11 @@ function BedPage() {
           </div>
         </section>
 
-        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-[#ecdca0] bg-[#fdf8e6] p-4">
+        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-[var(--oc-cream-line)] bg-[var(--oc-cream)] p-4">
           <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f4c024] text-[#171b20]">
             <Sparkles className="h-4 w-4" />
           </div>
-          <p className="text-xs leading-5 text-[#5c4a12]">
+          <p className="text-xs leading-5 text-[var(--oc-cream-text)]">
             <span className="font-bold">The reverse match.</span> Every CRM tells you which beds suit
             a lead. This tells you which leads suit a bed, so the moment a bed frees up you already
             know who to call.
@@ -244,15 +244,15 @@ function BedPage() {
               <h2 className="font-display text-2xl font-bold tracking-[-0.04em]">
                 Leads who could take it
               </h2>
-              <span className="rounded-full bg-[#eaf0fa] px-2 py-0.5 text-[10px] font-bold text-[#0943a0]">
+              <span className="rounded-full bg-[var(--oc-brand-soft)] px-2 py-0.5 text-[10px] font-bold text-[var(--oc-brand)]">
                 {matches.length} matched
               </span>
             </div>
-            <p className="mt-1 text-xs text-[#8b8f95]">
-              Ranked by fit, with the reason behind every point. Gender and budget are hard filters.
+            <p className="mt-1 text-xs text-[var(--oc-text-3)]">
+              Best fit first. Each score shows exactly why.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-[#8b8f95]">
+          <div className="flex items-center gap-2 text-[11px] text-[var(--oc-text-3)]">
             <span className="h-2 w-2 rounded-full bg-[#48b878]" /> 75+ strong
             <span className="ml-2 h-2 w-2 rounded-full bg-[#e5a135]" /> 50 to 74 decent
           </div>
@@ -268,16 +268,16 @@ function BedPage() {
             </EmptyNote>
           </div>
         ) : (
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             {matches.map(({ lead, score, reasons }, i) => {
               const wa = whatsappLink(lead, bed)
               return (
                 <div
                   key={lead.id}
-                  className={`rounded-2xl border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(42,30,21,0.08)] sm:p-5 ${
+                  className={`rounded-2xl border bg-[var(--oc-card)] p-4 transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(42,30,21,0.08)] sm:p-5 ${
                     i === 0
-                      ? 'border-[#bccdea] shadow-[0_8px_24px_rgba(9,67,160,0.08)]'
-                      : 'border-[#e4e0dd]'
+                      ? 'border-[var(--oc-brand-line)] shadow-[0_8px_24px_rgba(9,67,160,0.08)]'
+                      : 'border-[var(--oc-border)]'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -287,16 +287,16 @@ function BedPage() {
                         <Link
                           to="/occupancy/lead/$leadId"
                           params={{ leadId: lead.id }}
-                          className="text-sm font-bold hover:text-[#0943a0]"
+                          className="text-sm font-bold hover:text-[var(--oc-brand)]"
                         >
                           {lead.name}
                         </Link>
                         <StageChip stage={lead.stage} />
                         {i === 0 ? (
-                          <span className="text-[10px] font-bold text-[#0943a0]">Best fit</span>
+                          <span className="text-[10px] font-bold text-[var(--oc-brand)]">Best fit</span>
                         ) : null}
                       </div>
-                      <p className="mt-1 text-[11px] text-[#8b8f95]">
+                      <p className="mt-1 text-[11px] text-[var(--oc-text-3)]">
                         {inr(lead.budget_max)} budget
                         <Dot />
                         Wants {lead.preferred_localities?.join(', ') || 'anywhere'}
@@ -307,8 +307,8 @@ function BedPage() {
 
                   <ReasonGrid reasons={reasons} />
 
-                  <div className="mt-4 flex items-center justify-between border-t border-[#f0ece8] pt-3">
-                    <span className="flex items-center gap-1.5 text-[11px] text-[#777c83]">
+                  <div className="mt-4 flex items-center justify-between border-t border-[var(--oc-divider)] pt-3">
+                    <span className="flex items-center gap-1.5 text-[11px] text-[var(--oc-text-2)]">
                       <CalendarDays className="h-3.5 w-3.5" />
                       Move-in {shortDate(lead.move_in_date)}
                     </span>
@@ -317,7 +317,7 @@ function BedPage() {
                         <a
                           href={`tel:${lead.phone}`}
                           aria-label={`Call ${lead.name}`}
-                          className="grid h-9 w-9 place-items-center rounded-lg border border-[#e4e0dd] text-[#646971] transition hover:border-[#0943a0] hover:text-[#0943a0]"
+                          className="grid h-9 w-9 place-items-center rounded-lg border border-[var(--oc-border)] text-[var(--oc-text-2)] transition hover:border-[var(--oc-brand)] hover:text-[var(--oc-brand)]"
                         >
                           <Phone className="h-3.5 w-3.5" />
                         </a>
@@ -327,7 +327,7 @@ function BedPage() {
                             target="_blank"
                             rel="noreferrer"
                             aria-label={`WhatsApp ${lead.name} about this bed`}
-                            className="grid h-9 w-9 place-items-center rounded-lg bg-[#e9f8ef] text-[#24925d] transition hover:bg-[#d9f2e3]"
+                            className="grid h-9 w-9 place-items-center rounded-lg bg-[var(--oc-green-soft)] text-[var(--oc-green)] transition hover:bg-[var(--oc-green-soft-2)]"
                           >
                             <MessageCircle className="h-3.5 w-3.5" />
                           </a>

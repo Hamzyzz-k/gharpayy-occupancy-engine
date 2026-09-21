@@ -11,9 +11,9 @@ import { scoreBand } from '@/lib/occupancy/matching'
 
 const RING_COLOR = { strong: '#48b878', decent: '#e5a135', weak: '#b9b3ad' } as const
 const TEXT_COLOR = {
-  strong: 'text-[#24805b]',
-  decent: 'text-[#c98218]',
-  weak: 'text-[#8b8f95]',
+  strong: 'text-[var(--oc-green)]',
+  decent: 'text-[var(--oc-amber)]',
+  weak: 'text-[var(--oc-text-3)]',
 } as const
 
 /** Text colour for a bare score number. */
@@ -47,7 +47,14 @@ export function ScoreRing({
       aria-label={label ?? `Match score ${score} out of 100`}
     >
       <svg className="h-full w-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#f0ece8" strokeWidth={5} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          strokeWidth={5}
+          style={{ stroke: 'var(--oc-divider)' }}
+        />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -61,7 +68,7 @@ export function ScoreRing({
         />
       </svg>
       <div className="absolute inset-0 grid place-items-center">
-        <span className="font-display text-sm font-bold text-[#171b20]">{score}</span>
+        <span className="font-display text-sm font-bold text-[var(--oc-text)]">{score}</span>
       </div>
     </div>
   )
@@ -81,18 +88,18 @@ export function ReasonGrid({ reasons }: { reasons: MatchReason[] }) {
       {reasons.map((r) => (
         <div key={r.label} className="min-w-0">
           <div className="mb-1.5 flex items-center justify-between gap-2 text-[10px]">
-            <span className="font-bold text-[#686e75]">{r.label}</span>
-            <span className="font-bold tabular-nums text-[#171b20]">
+            <span className="font-bold text-[var(--oc-text-2)]">{r.label}</span>
+            <span className="font-bold tabular-nums text-[var(--oc-text)]">
               {Math.round(r.points)} / {r.outOf}
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-[#f0ece8]">
+          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--oc-divider)]">
             <div
               className={`h-full rounded-full ${barColor(r)}`}
               style={{ width: `${Math.round((r.points / r.outOf) * 100)}%` }}
             />
           </div>
-          <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-[#8b8f95]">{r.detail}</p>
+          <p className="mt-1.5 line-clamp-2 text-[10px] leading-4 text-[var(--oc-text-3)]">{r.detail}</p>
         </div>
       ))}
     </div>

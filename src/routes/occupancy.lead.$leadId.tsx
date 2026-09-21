@@ -49,42 +49,42 @@ export const Route = createFileRoute('/occupancy/lead/$leadId')({
 
 const RISK = {
   critical: {
-    chip: 'bg-[#fff0ee] text-[#d53a35]',
+    chip: 'bg-[var(--oc-red-soft)] text-[var(--oc-red)]',
     ring: '#e12527',
-    text: 'text-[#d53a35]',
+    text: 'text-[var(--oc-red)]',
     label: 'Critical risk',
     line: 'At real risk of going quiet. Reach out today.',
   },
   warm: {
-    chip: 'bg-[#fff7e7] text-[#c98218]',
+    chip: 'bg-[var(--oc-amber-soft)] text-[var(--oc-amber)]',
     ring: '#e5a135',
-    text: 'text-[#c98218]',
+    text: 'text-[var(--oc-amber)]',
     label: 'Warm risk',
     line: 'Worth a nudge soon. Keep the conversation moving.',
   },
   ok: {
-    chip: 'bg-[#edf8f1] text-[#24805b]',
+    chip: 'bg-[var(--oc-green-soft)] text-[var(--oc-green)]',
     ring: '#48b878',
-    text: 'text-[#24805b]',
+    text: 'text-[var(--oc-green)]',
     label: 'Low risk',
     line: 'In good shape. Keep the next step clear.',
   },
   cold: {
-    chip: 'bg-[#f2f0ed] text-[#646971]',
+    chip: 'bg-[var(--oc-chip)] text-[var(--oc-text-2)]',
     ring: '#b9b3ad',
-    text: 'text-[#646971]',
+    text: 'text-[var(--oc-text-2)]',
     label: 'Gone cold',
     line: 'No contact in weeks and no near move-in. Probably found somewhere else. Worth one last message.',
   },
 } as const
 
 const ACTIVITY_ICON: Record<Activity['type'], { icon: typeof Phone; cls: string }> = {
-  call: { icon: Phone, cls: 'bg-[#eaf0fa] text-[#0943a0]' },
-  whatsapp: { icon: MessageCircle, cls: 'bg-[#e9f8ef] text-[#24925d]' },
-  email: { icon: NotebookPen, cls: 'bg-[#f2f0ed] text-[#646971]' },
-  visit: { icon: MapPin, cls: 'bg-[#f3effb] text-[#7457a8]' },
-  note: { icon: NotebookPen, cls: 'bg-[#f2f0ed] text-[#646971]' },
-  stage_change: { icon: ArrowRightLeft, cls: 'bg-[#eef4fb] text-[#5077a7]' },
+  call: { icon: Phone, cls: 'bg-[var(--oc-brand-soft)] text-[var(--oc-brand)]' },
+  whatsapp: { icon: MessageCircle, cls: 'bg-[var(--oc-green-soft)] text-[var(--oc-green)]' },
+  email: { icon: NotebookPen, cls: 'bg-[var(--oc-chip)] text-[var(--oc-text-2)]' },
+  visit: { icon: MapPin, cls: 'bg-[var(--oc-purple-soft)] text-[var(--oc-purple)]' },
+  note: { icon: NotebookPen, cls: 'bg-[var(--oc-chip)] text-[var(--oc-text-2)]' },
+  stage_change: { icon: ArrowRightLeft, cls: 'bg-[var(--oc-brand-soft)] text-[var(--oc-brand)]' },
 }
 
 function activityText(a: Activity): string {
@@ -177,7 +177,7 @@ function LeadPage() {
             lead.phone ? (
               <a
                 href={`tel:${lead.phone}`}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#171b20] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#2b3037]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--oc-ink)] px-4 py-2.5 text-xs font-bold text-[var(--oc-ink-fg)] transition hover:bg-[var(--oc-ink-hover)]"
               >
                 <Phone className="h-3.5 w-3.5" />
                 Call lead
@@ -197,16 +197,16 @@ function LeadPage() {
                   {r.label}
                 </span>
               </div>
-              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-[#777c83]">
+              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-[var(--oc-text-2)]">
                 {lead.phone ? (
                   <>
                     <Phone className="h-3 w-3" />
                     {lead.phone}
-                    <span className="text-[#d0cbc5]">•</span>
+                    <span className="text-[var(--oc-faint)]">•</span>
                   </>
                 ) : null}
                 <span className="capitalize">{lead.source ?? 'unknown'} lead</span>
-                <span className="text-[#d0cbc5]">•</span>
+                <span className="text-[var(--oc-faint)]">•</span>
                 contacted {relativeDays(lead.last_contacted_at)}
               </p>
             </div>
@@ -217,7 +217,7 @@ function LeadPage() {
                 label={`Risk of loss ${risk.risk} out of 100`}
               />
               <div className="hidden sm:block">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-[#8b8f95]">Risk of loss</p>
+                <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--oc-text-3)]">Risk of loss</p>
                 <ul className="mt-1 space-y-0.5">
                   {risk.reasons.slice(0, 2).map((reason) => (
                     <li key={reason} className={`text-xs font-bold ${r.text}`}>
@@ -228,7 +228,7 @@ function LeadPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[#f0ece8] pt-5 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[var(--oc-divider)] pt-5 sm:grid-cols-4">
             <Fact label="Budget" value={`${inr(lead.budget_max)} / month`} />
             <Fact label="Wants" value={lead.preferred_localities?.join(', ') || 'Anywhere'} />
             <Fact
@@ -243,10 +243,10 @@ function LeadPage() {
         <section className={`${CARD} mt-4 p-5 sm:p-6`}>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#8b8f95]">Pipeline</p>
-              <p className="mt-1 text-sm text-[#646971]">Click any stage to move this lead.</p>
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--oc-text-3)]">Pipeline</p>
+              <p className="mt-1 text-sm text-[var(--oc-text-2)]">Click any stage to move this lead.</p>
             </div>
-            <span className="shrink-0 rounded-lg bg-[#eaf0fa] px-2 py-1 text-[10px] font-bold text-[#0943a0]">
+            <span className="shrink-0 rounded-lg bg-[var(--oc-brand-soft)] px-2 py-1 text-[10px] font-bold text-[var(--oc-brand)]">
               Current: {STAGE_LABELS[lead.stage]}
             </span>
           </div>
@@ -262,16 +262,16 @@ function LeadPage() {
                       ? 'done'
                       : 'todo'
                 const circle = {
-                  done: 'border-[#48b878] bg-[#edf8f1] text-[#24805b]',
-                  current: 'border-[#0943a0] bg-white text-[#0943a0]',
-                  lost: 'border-[#e12527] bg-[#fff0ee] text-[#d53a35]',
-                  todo: 'border-[#e4e0dd] bg-white text-[#9ca1a6]',
+                  done: 'border-[#48b878] bg-[var(--oc-green-soft)] text-[var(--oc-green)]',
+                  current: 'border-[var(--oc-brand)] bg-[var(--oc-card)] text-[var(--oc-brand)]',
+                  lost: 'border-[#e12527] bg-[var(--oc-red-soft)] text-[var(--oc-red)]',
+                  todo: 'border-[var(--oc-border)] bg-[var(--oc-card)] text-[var(--oc-text-3)]',
                 }[state]
                 const labelCls = {
-                  done: 'text-[#24805b]',
-                  current: 'text-[#0943a0]',
-                  lost: 'text-[#d53a35]',
-                  todo: 'text-[#9ca1a6]',
+                  done: 'text-[var(--oc-green)]',
+                  current: 'text-[var(--oc-brand)]',
+                  lost: 'text-[var(--oc-red)]',
+                  todo: 'text-[var(--oc-text-3)]',
                 }[state]
                 return (
                   <div
@@ -286,7 +286,7 @@ function LeadPage() {
                       className={`group flex flex-col items-center gap-2 text-center text-[10px] font-bold transition disabled:opacity-60 ${labelCls}`}
                     >
                       <span
-                        className={`grid h-7 w-7 place-items-center rounded-full border-2 transition group-hover:border-[#0943a0] ${circle}`}
+                        className={`grid h-7 w-7 place-items-center rounded-full border-2 transition group-hover:border-[var(--oc-brand)] ${circle}`}
                       >
                         {state === 'done' ? <Check className="h-3.5 w-3.5" /> : i + 1}
                       </span>
@@ -295,7 +295,7 @@ function LeadPage() {
                     {i < LEAD_STAGES.length - 1 ? (
                       <div
                         className={`mx-2 mb-5 h-px flex-1 ${
-                          !isLost && i < currentIdx ? 'bg-[#82d2a3]' : 'bg-[#e4e0dd]'
+                          !isLost && i < currentIdx ? 'bg-[#82d2a3]' : 'bg-[var(--oc-border)]'
                         }`}
                       />
                     ) : null}
@@ -306,7 +306,7 @@ function LeadPage() {
           </div>
         </section>
 
-        <div className="mt-4 grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
+        <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
           {/* ---- Best beds ------------------------------------------------ */}
           <section className={`${CARD} p-5 sm:p-6`}>
             <div className="flex items-center justify-between gap-3">
@@ -314,11 +314,11 @@ function LeadPage() {
                 <h2 className="font-display text-xl font-bold tracking-[-0.035em]">
                   Best beds for {firstName}
                 </h2>
-                <p className="mt-1 text-xs text-[#8b8f95]">
+                <p className="mt-1 text-xs text-[var(--oc-text-3)]">
                   Ranked on budget, locality, move-in date and sharing type.
                 </p>
               </div>
-              <span className="shrink-0 rounded-full bg-[#f7f3ef] px-2 py-1 text-[10px] font-bold text-[#646971]">
+              <span className="shrink-0 rounded-full bg-[var(--oc-chip)] px-2 py-1 text-[10px] font-bold text-[var(--oc-text-2)]">
                 {matches.length} match{matches.length === 1 ? '' : 'es'}
               </span>
             </div>
@@ -334,17 +334,17 @@ function LeadPage() {
                     key={bed.bed_id}
                     to="/occupancy/bed/$bedId"
                     params={{ bedId: bed.bed_id }}
-                    className="group flex items-center gap-3 rounded-xl border border-[#eee9e5] p-3.5 transition hover:border-[#bccdea] hover:bg-[#f6f8fc]"
+                    className="group flex items-center gap-3 rounded-xl border border-[var(--oc-divider)] p-3.5 transition hover:border-[var(--oc-brand-line)] hover:bg-[var(--oc-hover)]"
                   >
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#eaf0fa] text-[#0943a0]">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--oc-brand-soft)] text-[var(--oc-brand)]">
                       <BedDouble className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-bold group-hover:text-[#0943a0]">
+                      <p className="truncate text-xs font-bold group-hover:text-[var(--oc-brand)]">
                         {shortProperty(bed.property_name)} · Room {bed.room_number}
                         {bed.bed_label}
                       </p>
-                      <p className="mt-1 truncate text-[11px] text-[#8b8f95]">
+                      <p className="mt-1 truncate text-[11px] text-[var(--oc-text-3)]">
                         <span className="capitalize">{bed.sharing_type}</span>
                         <Dot />
                         {inr(bed.monthly_rent)}
@@ -353,19 +353,19 @@ function LeadPage() {
                           ? 'available now'
                           : `available ${shortDate(bed.available_from)}`}
                       </p>
-                      <p className="mt-1 truncate text-[10px] text-[#a5a9ae]">
+                      <p className="mt-1 truncate text-[10px] text-[var(--oc-text-3)]">
                         {reasons.map((x) => x.detail).slice(0, 2).join(' · ')}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className={`font-display text-lg font-bold ${scoreText(score)}`}>{score}</p>
-                      <p className="text-[10px] text-[#8b8f95]">
+                      <p className="text-[10px] text-[var(--oc-text-3)]">
                         {bed.status === 'vacant'
                           ? `${inr(Number(bed.revenue_lost))} at risk`
                           : 'fit score'}
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-[#c9c2bc]" />
+                    <ChevronRight className="h-4 w-4 shrink-0 text-[var(--oc-faint)]" />
                   </Link>
                 ))
               )}
@@ -375,20 +375,20 @@ function LeadPage() {
           {/* ---- Activity --------------------------------------------------- */}
           <section className={`${CARD} p-5 sm:p-6`}>
             <h2 className="font-display text-xl font-bold tracking-[-0.035em]">Log an activity</h2>
-            <p className="mt-1 text-xs text-[#8b8f95]">Keep the lead context fresh.</p>
+            <p className="mt-1 text-xs text-[var(--oc-text-3)]">Keep the lead context fresh.</p>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="What happened on the call?"
               aria-label="Activity note"
-              className="mt-5 min-h-[98px] w-full resize-none rounded-xl border border-[#e4e0dd] bg-[#fcf9f7] p-3 text-xs outline-none transition placeholder:text-[#a5a9ae] focus:border-[#0943a0] focus:ring-2 focus:ring-[#0943a0]/10"
+              className="mt-5 min-h-[98px] w-full resize-none rounded-xl border border-[var(--oc-border)] bg-[var(--oc-sunken)] p-3 text-xs outline-none transition placeholder:text-[var(--oc-text-3)] focus:border-[var(--oc-brand)] focus:ring-2 focus:ring-[var(--oc-brand)]/10"
             />
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 disabled={logActivity.isPending}
                 onClick={() => handleLog('call')}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#e4e0dd] px-3 py-2.5 text-xs font-bold text-[#3c4248] transition hover:border-[#0943a0] hover:text-[#0943a0] disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--oc-border)] px-3 py-2.5 text-xs font-bold text-[var(--oc-text)] transition hover:border-[var(--oc-brand)] hover:text-[var(--oc-brand)] disabled:opacity-60"
               >
                 <Phone className="h-3.5 w-3.5" /> Log call
               </button>
@@ -396,14 +396,14 @@ function LeadPage() {
                 type="button"
                 disabled={logActivity.isPending}
                 onClick={() => handleLog('whatsapp')}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#e9f8ef] px-3 py-2.5 text-xs font-bold text-[#24925d] transition hover:bg-[#d9f2e3] disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--oc-green-soft)] px-3 py-2.5 text-xs font-bold text-[var(--oc-green)] transition hover:bg-[var(--oc-green-soft-2)] disabled:opacity-60"
               >
                 <MessageCircle className="h-3.5 w-3.5" /> Log WhatsApp
               </button>
             </div>
 
-            <div className="mt-6 border-t border-[#f0ece8] pt-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8b8f95]">
+            <div className="mt-6 border-t border-[var(--oc-divider)] pt-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--oc-text-3)]">
                 Recent activity
               </p>
               <div className="mt-4 max-h-[360px] space-y-4 overflow-y-auto pr-1">
@@ -418,7 +418,7 @@ function LeadPage() {
                       </span>
                       <div className="min-w-0">
                         <p className="text-xs font-semibold">{activityText(a)}</p>
-                        <p className="mt-1 text-[10px] text-[#8b8f95]">
+                        <p className="mt-1 text-[10px] text-[var(--oc-text-3)]">
                           {a.created_by ?? 'Someone'} · {relativeDays(a.created_at)}
                         </p>
                       </div>
@@ -426,7 +426,7 @@ function LeadPage() {
                   )
                 })}
                 {(activities ?? []).length === 0 ? (
-                  <p className="text-xs text-[#8b8f95]">
+                  <p className="text-xs text-[var(--oc-text-3)]">
                     Nothing logged yet. That&apos;s usually how leads get lost.
                   </p>
                 ) : null}
@@ -442,7 +442,7 @@ function LeadPage() {
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8b8f95]">{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--oc-text-3)]">{label}</p>
       <p className="mt-1.5 truncate text-sm font-bold">{value}</p>
     </div>
   )
