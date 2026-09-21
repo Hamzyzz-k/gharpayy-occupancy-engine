@@ -66,7 +66,7 @@ now, which beds, and who can fill each one.**
 |---|---|---|
 | **Lead Pipeline** | `/occupancy/pipeline` | 150 leads from Postgres, live funnel counts, search and stage filters. Stage changes persist and write an audit row. |
 | **Bed Inventory** | `/occupancy/inventory` | Property → room → bed, sorted worst-occupancy-first, with live availability and idle-rent per property. |
-| **Follow-ups** | `/occupancy/rescue` | Real tasks you can complete, plus the ranked Rescue List. |
+| **Follow-ups** | `/occupancy/rescue` | Real tasks you can complete, plus a ranked Rescue List of who to call today. |
 
 ### 2 new ideas
 
@@ -95,6 +95,40 @@ moment a tenant gives notice, not the day it empties.** So it shows a 60-day
 forward view of beds about to open up, each already pre-matched to waiting
 leads. Closing a 20-day vacancy gap on ~40 beds a month is roughly ₹2.2L/month
 recovered.
+
+---
+
+### The Rescue List scoring
+
+Leads are lost to silence rather than refusals, but silence alone is a poor
+signal: two quiet days mean nothing for someone moving in three months and
+everything for someone moving in five days. Each active lead scores out of 100
+as **urgency (up to 55) + silence (up to 35, capped at two weeks) + pipeline
+stage (up to 10)**. Leads silent for three weeks with no move-in inside that
+window are grouped as *gone cold* rather than critical.
+
+The first version multiplied those factors. On the seeded data that marked 62
+of 123 active leads critical, 46 of them tied at 100, because ten days of
+silence alone reached the threshold whatever the move-in date. Adding the parts
+keeps urgency in charge: 20 critical, 38 warm, 56 fine, 9 gone cold.
+
+---
+
+## Design
+
+- **Gharpayy's brand, not the repo's theme.** The existing app is themed
+  orange; gharpayy.com uses blue `#0943a0` and yellow `#f4c024`. The app is
+  re-themed to match, with yellow for call-to-action buttons as on the site.
+  Red, green and amber are reserved for meaning: loss, good, warning.
+- **Light and dark mode**, switched from the header and remembered between
+  visits. Colours on the new screens are tokens with a value for each mode.
+- **Every number is real.** Nothing on screen is decorative data; where a
+  figure would need history the database doesn't hold, it isn't shown.
+- **Checked at eight widths**, 320px to 1920px, with a script that measures
+  every text box on every screen and flags overlaps or sideways scrolling.
+  All seven screens pass at all eight widths.
+- **Demo data is labelled** on every screen: the properties and leads are
+  generated, the backend is live.
 
 ---
 
