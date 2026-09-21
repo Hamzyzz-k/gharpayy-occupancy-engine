@@ -124,7 +124,7 @@ function OccupancyPage() {
               {isLoading ? (
                 <div className="mt-9 h-[72px] w-56 animate-pulse rounded-xl bg-white/10" />
               ) : (
-                <p className="mt-9 font-display text-[52px] font-bold leading-none tracking-[-0.06em] text-[var(--oc-hover)] sm:text-[72px]">
+                <p className="mt-9 font-display text-[52px] font-bold leading-none tracking-[-0.06em] text-white sm:text-[72px]">
                   {inrShort(stats.revenueAtRisk)}
                 </p>
               )}
