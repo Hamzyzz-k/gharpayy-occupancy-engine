@@ -21,6 +21,9 @@ export const MATCH_WEIGHTS = {
   sharing: 15,
 } as const
 
+/** How far over budget still counts as a stretch rather than unaffordable. */
+export const BUDGET_STRETCH = 0.1
+
 export const MAX_SCORE =
   MATCH_WEIGHTS.budget +
   MATCH_WEIGHTS.locality +
@@ -55,7 +58,7 @@ export interface MatchReason {
 
 export interface MatchResult {
   score: number
-  /** False when a hard filter (gender / not sellable) rules this pairing out. */
+  /** False when a hard filter (not sellable, gender, unaffordable) rules this pairing out. */
   eligible: boolean
   /** Populated when eligible is false. */
   disqualifiedBecause?: string
@@ -79,7 +82,7 @@ function formatINR(n: number): string {
 /**
  * Score one lead against one bed.
  *
- * Hard filters run first and short-circuit — a male lead in a female room isn't
+ * Hard filters run first and short-circuit. A male lead in a female room isn't
  * "a low score", it's not a match at all, and showing it at 40/100 would be
  * worse than useless.
  */
@@ -104,6 +107,19 @@ export function scoreMatch(lead: Lead, bed: BedAvailability): MatchResult {
     }
   }
 
+  // ---- Hard filter 3: affordability -----------------------------------------
+  // Someone who cannot afford the bed is not a weak match, they are not a
+  // match. Scoring them let a lead at half the rent rank 65/100 on locality
+  // and dates alone, which is exactly the kind of result nobody can defend.
+  if (lead.budget_max != null && bed.monthly_rent > lead.budget_max * (1 + BUDGET_STRETCH)) {
+    return {
+      score: 0,
+      eligible: false,
+      disqualifiedBecause: `${formatINR(bed.monthly_rent - lead.budget_max)} over budget`,
+      reasons: [],
+    }
+  }
+
   const reasons: MatchReason[] = []
 
   // ---- Budget (35) ----------------------------------------------------------
@@ -122,18 +138,15 @@ export function scoreMatch(lead: Lead, bed: BedAvailability): MatchResult {
       const headroom = lead.budget_max - bed.monthly_rent
       detail =
         headroom > 0
-          ? `${formatINR(bed.monthly_rent)} — ${formatINR(headroom)} under budget`
-          : `${formatINR(bed.monthly_rent)} — exactly at budget`
+          ? `${formatINR(bed.monthly_rent)}, ${formatINR(headroom)} under budget`
+          : `${formatINR(bed.monthly_rent)}, exactly at budget`
     } else {
+      // Only reachable within the stretch band; beyond it the hard filter
+      // above has already ruled the bed out.
       const overBy = bed.monthly_rent - lead.budget_max
       const stretch = overBy / lead.budget_max
-      if (stretch <= 0.1) {
-        points = w * (1 - stretch / 0.1) * 0.6
-        detail = `${formatINR(overBy)} over budget — a stretch`
-      } else {
-        points = 0
-        detail = `${formatINR(overBy)} over budget — out of range`
-      }
+      points = w * (1 - stretch / BUDGET_STRETCH) * 0.6
+      detail = `${formatINR(overBy)} over budget, a stretch`
     }
     reasons.push({ label: 'Budget', points, outOf: w, detail, tone: tone(points, w) })
   }
@@ -150,13 +163,15 @@ export function scoreMatch(lead: Lead, bed: BedAvailability): MatchResult {
       detail = 'No locality preference'
     } else if (prefs.includes(bed.locality)) {
       points = w
-      detail = `${bed.locality} — exactly what they asked for`
+      detail = `${bed.locality}, exactly what they asked for`
     } else if (prefs.some((p) => (NEARBY[p] ?? []).includes(bed.locality))) {
+      // Name the preference it is actually near, not simply the first one.
+      const near = prefs.find((p) => (NEARBY[p] ?? []).includes(bed.locality))
       points = w * 0.5
-      detail = `${bed.locality} — next to ${prefs[0]}`
+      detail = `${bed.locality}, next to ${near}`
     } else {
       points = w * 0.15
-      detail = `${bed.locality} — they wanted ${prefs.join(' or ')}`
+      detail = `${bed.locality}, but they wanted ${prefs.join(' or ')}`
     }
     reasons.push({ label: 'Locality', points, outOf: w, detail, tone: tone(points, w) })
   }
@@ -182,7 +197,7 @@ export function scoreMatch(lead: Lead, bed: BedAvailability): MatchResult {
         detail =
           bed.status === 'vacant'
             ? 'Free right now'
-            : `Free ${availableFrom.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} — before they need it`
+            : `Free ${availableFrom.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}, before they need it`
       } else if (lateBy <= 21) {
         points = w * (1 - lateBy / 21)
         detail = `Free ${lateBy} day${lateBy === 1 ? '' : 's'} after they want to move`
@@ -206,7 +221,7 @@ export function scoreMatch(lead: Lead, bed: BedAvailability): MatchResult {
       detail = 'Open to any sharing type'
     } else if (pref === bed.sharing_type) {
       points = w
-      detail = `${bed.sharing_type} — as requested`
+      detail = `${bed.sharing_type}, as requested`
     } else {
       points = w * 0.25
       detail = `${bed.sharing_type}, they asked for ${pref}`
@@ -226,7 +241,7 @@ export interface ScoredLead extends MatchResult {
   lead: Lead
 }
 
-/** DIRECTION 1 — lead arrives, which beds should we show them? */
+/** DIRECTION 1: lead arrives, which beds should we show them? */
 export function bestBedsForLead(
   lead: Lead,
   beds: BedAvailability[],
@@ -240,11 +255,11 @@ export function bestBedsForLead(
 }
 
 /**
- * DIRECTION 2 — a bed opens up, who's waiting who'd take it?
+ * DIRECTION 2: a bed opens up, who's waiting who'd take it?
  *
  * This is the one nobody builds, because if you think of the product as a lead
  * CRM the lead is always the starting point. Leads already booked, moved in or
- * lost are excluded — they're not in the market any more.
+ * lost are excluded because they're not in the market any more.
  */
 export function bestLeadsForBed(
   bed: BedAvailability,
