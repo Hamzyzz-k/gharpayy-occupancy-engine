@@ -316,8 +316,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="hidden md:flex w-[240px] flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border sticky top-0 h-screen">
         <div className="px-5 py-5 flex items-center gap-2 border-b border-sidebar-border">
-          <div className="h-9 w-9 rounded-lg bg-accent flex items-center justify-center">
-            <Building2 className="h-4 w-4 text-accent-foreground" />
+          <div className="h-9 w-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
+            <Building2 className="h-4 w-4 text-sidebar-primary-foreground" />
           </div>
           <div className="leading-tight">
             <div className="text-sidebar-accent-foreground font-display font-semibold text-sm">Gharpayy</div>
@@ -358,7 +358,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   active
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-                  it.accent && !active && "text-accent",
+                  it.accent && !active && "text-sidebar-primary",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -367,7 +367,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <span className={cn(
                     "ml-auto text-[10px] rounded-full px-1.5 py-0.5 font-mono",
                     it.accent
-                      ? "bg-accent text-accent-foreground"
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
                       : "bg-destructive text-destructive-foreground",
                   )}>
                     {it.badge}

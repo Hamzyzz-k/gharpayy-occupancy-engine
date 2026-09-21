@@ -60,6 +60,8 @@
 }
 
 :root {
+  /* Brand colours from gharpayy.com: blue #0943a0 for primary and accent,
+     yellow #f4c024 (their --primary-theme-color) on the dark sidebar. */
   --radius: 0.75rem;
 
   --background: oklch(0.985 0.004 60);
@@ -69,7 +71,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.012 260);
 
-  --primary: oklch(0.715 0.185 45);
+  --primary: #0943a0;
   --primary-foreground: oklch(0.99 0 0);
 
   --secondary: oklch(0.96 0.008 60);
@@ -77,7 +79,7 @@
   --muted: oklch(0.965 0.006 60);
   --muted-foreground: oklch(0.52 0.014 260);
 
-  --accent: oklch(0.715 0.185 45);
+  --accent: #0943a0;
   --accent-foreground: oklch(0.99 0 0);
 
   --destructive: oklch(0.585 0.22 27);
@@ -91,7 +93,7 @@
 
   --border: oklch(0.91 0.006 60);
   --input: oklch(0.91 0.006 60);
-  --ring: oklch(0.715 0.185 45);
+  --ring: #0943a0;
 
   --intent-hot: oklch(0.585 0.22 27);
   --intent-warm: oklch(0.78 0.16 75);
@@ -99,14 +101,14 @@
 
   --sidebar: oklch(0.21 0.012 260);
   --sidebar-foreground: oklch(0.86 0.006 260);
-  --sidebar-primary: oklch(0.715 0.185 45);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-primary: #f4c024;
+  --sidebar-primary-foreground: #171b20;
   --sidebar-accent: oklch(0.28 0.012 260);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.3 0.012 260);
-  --sidebar-ring: oklch(0.715 0.185 45);
+  --sidebar-ring: #f4c024;
 
-  --chart-1: oklch(0.715 0.185 45);
+  --chart-1: #0943a0;
   --chart-2: oklch(0.62 0.14 155);
   --chart-3: oklch(0.66 0.14 245);
   --chart-4: oklch(0.78 0.16 75);
@@ -126,12 +128,12 @@
   --secondary-foreground: oklch(0.92 0.005 250);
   --muted: oklch(0.245 0.012 260);
   --muted-foreground: oklch(0.62 0.012 260);
-  --accent: oklch(0.715 0.185 45);
+  --accent: #0943a0;
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.585 0.22 27);
   --border: oklch(0.28 0.012 260);
   --input: oklch(0.28 0.012 260);
-  --ring: oklch(0.715 0.185 45);
+  --ring: #0943a0;
 }
 
 @layer base {
