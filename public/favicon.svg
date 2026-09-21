@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Matches the sidebar logo: Gharpayy yellow tile, dark building mark. -->
+  <rect width="64" height="64" rx="14" fill="#f4c024"/>
+  <g transform="translate(14 14) scale(1.5)" fill="none" stroke="#171b20" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+    <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
+    <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+    <path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>
+  </g>
+</svg>
