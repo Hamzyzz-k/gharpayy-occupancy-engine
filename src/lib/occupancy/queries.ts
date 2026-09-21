@@ -90,7 +90,7 @@ export function useLead(id: string | undefined) {
     enabled: Boolean(id),
     ...FAIL_FAST,
     queryFn: async (): Promise<Lead | null> => {
-      const { data, error } = await withTimeout(
+      const { data, error } = await withTimeout<{ data: unknown; error: { message: string } | null }>(
         db.from('leads').select('*').eq('id', id).maybeSingle(),
       )
       if (error) throw new Error(error.message)
