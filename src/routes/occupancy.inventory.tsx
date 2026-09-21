@@ -63,7 +63,7 @@ function InventoryPage() {
           idleRent: vacant.reduce((s, r) => s + Number(r.monthly_rent), 0),
         }
       })
-      .sort((a, b) => a.occupancyPct - b.occupancyPct) // worst first — that's where the work is
+      .sort((a, b) => a.occupancyPct - b.occupancyPct) // worst first, since that's where the work is
   }, [beds])
 
   return (

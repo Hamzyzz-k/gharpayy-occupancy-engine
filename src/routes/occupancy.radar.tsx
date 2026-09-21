@@ -35,7 +35,7 @@ function RadarPage() {
   const { data: beds, isLoading } = useBedAvailability()
   const { data: leads } = useLeads()
 
-  /** Every sellable bed — empty now, or emptying because notice was given. */
+  /** Every sellable bed: empty now, or emptying because notice was given. */
   const sellable = useMemo(() => {
     return (beds ?? [])
       .filter((b) => b.available_from !== null)
@@ -83,7 +83,7 @@ function RadarPage() {
           </div>
           <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
             A bed isn&apos;t only inventory once it&apos;s empty. The moment a tenant
-            gives notice it becomes sellable — so we start selling it then, not on the
+            gives notice it becomes sellable, so we start selling it then, not on the
             day it empties. Every bed below already has matched leads attached.
           </p>
           {futureRent > 0 ? (

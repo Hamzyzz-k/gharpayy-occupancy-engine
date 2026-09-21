@@ -25,7 +25,7 @@ export const Route = createFileRoute('/occupancy/pipeline')({
   component: PipelinePage,
 })
 
-/** Stages shown as the funnel across the top. 'lost' is excluded — it's not a step. */
+/** Stages shown as the funnel across the top. 'lost' is excluded because it's not a step. */
 const FUNNEL: LeadStage[] = LEAD_STAGES.filter((s) => s !== 'lost')
 
 function PipelinePage() {
@@ -68,7 +68,7 @@ function PipelinePage() {
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {leads?.length ?? 0} leads · {conversion.toFixed(1)}% converted to booked or
-            moved in. Live from Postgres — stage changes persist.
+            moved in. Live from Postgres, and stage changes persist.
           </p>
         </header>
 
@@ -111,7 +111,7 @@ function PipelinePage() {
               className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs hover:bg-muted"
             >
               <Filter className="h-3 w-3" />
-              {STAGE_LABELS[stage]} — clear
+              Clear {STAGE_LABELS[stage]}
             </button>
           ) : null}
         </div>

@@ -1,7 +1,7 @@
 /**
  * Shared bits for showing a match score.
  *
- * The reasons list is not decoration — it's the product. A salesperson has to
+ * The reasons list is not decoration. It's the product. A salesperson has to
  * be able to say "this one because it's ₹500 under your budget and free before
  * you move" on a phone call. A bare number can't be defended.
  */

@@ -128,7 +128,7 @@ function BedPage() {
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Every CRM can tell you which beds suit a lead. This tells you which
-                  leads suit a bed — ranked, with the reason for every point. Nobody had
+                  leads suit a bed, ranked, with the reason for every point. Nobody had
                   to remember any of it.
                 </p>
               </div>

@@ -1,5 +1,5 @@
 /**
- * The Rescue List — lead decay, weighted by move-in urgency.
+ * The Rescue List: lead decay, weighted by move-in urgency.
  *
  * Most CRMs sort follow-ups by "last contacted" and get this exactly backwards.
  * Two days of silence means completely different things:
@@ -15,7 +15,7 @@
 import type { Lead } from './types'
 import { STAGE_LABELS } from './types'
 
-/** Leads no longer in the market — nothing to rescue. */
+/** Leads no longer in the market, so nothing to rescue. */
 const CLOSED_STAGES = ['booked', 'moved_in', 'lost']
 
 /** Later pipeline stages have more sunk effort, so silence costs more. */
@@ -55,14 +55,14 @@ function urgencyMultiplier(daysToMoveIn: number | null): { mul: number; note: st
 export function rescueScore(lead: Lead): RescueScore {
   const reasons: string[] = []
 
-  // Never contacted? Measure silence from when they came in — that's worse,
+  // Never contacted? Measure silence from when they came in. That's worse,
   // not better, than a lead who was contacted once and went quiet.
   const sinceContact = daysSince(lead.last_contacted_at)
   const sinceCreated = daysSince(lead.created_at) ?? 0
   const daysSinceContact = sinceContact ?? sinceCreated
 
   if (sinceContact === null) {
-    reasons.push(`Never contacted — sitting for ${sinceCreated} days`)
+    reasons.push(`Never contacted, sitting for ${sinceCreated} days`)
   } else {
     reasons.push(
       daysSinceContact === 0
@@ -80,7 +80,7 @@ export function rescueScore(lead: Lead): RescueScore {
 
   const stageMul = STAGE_MULTIPLIER[lead.stage] ?? 1.0
   if (stageMul >= 1.35) {
-    reasons.push(`Already at "${STAGE_LABELS[lead.stage]}" — expensive to lose`)
+    reasons.push(`Already at "${STAGE_LABELS[lead.stage]}", expensive to lose`)
   }
 
   // Never-contacted leads carry a penalty floor so a brand-new lead that nobody

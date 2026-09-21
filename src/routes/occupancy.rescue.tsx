@@ -50,7 +50,7 @@ function RescuePage() {
             <h1 className="text-2xl font-display font-bold">Rescue List</h1>
           </div>
           <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-            Leads aren&apos;t lost to &ldquo;no&rdquo; — they&apos;re lost to silence.
+            Leads aren&apos;t lost to &ldquo;no&rdquo;. They&apos;re lost to silence.
             But two days of silence means nothing for someone moving in three months and
             everything for someone moving in five days. This list decays by silence and
             multiplies by urgency, so the software decides the order and you just work
@@ -61,7 +61,7 @@ function RescuePage() {
               <span className="font-semibold text-red-500">
                 {critical.length} critical
               </span>
-              <span className="text-muted-foreground"> — call these before lunch.</span>
+              <span className="text-muted-foreground">. Call these before lunch.</span>
             </p>
           ) : null}
         </header>

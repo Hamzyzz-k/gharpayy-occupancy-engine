@@ -156,7 +156,7 @@ function LeadPage() {
             ) : null}
           </div>
 
-          {/* ---- Stage picker — this write is the "it's real" proof ----- */}
+          {/* ---- Stage picker: this write is the "it's real" proof ----- */}
           <div className="mt-4 border-t pt-4">
             <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Pipeline stage

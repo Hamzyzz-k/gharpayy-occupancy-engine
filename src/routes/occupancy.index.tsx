@@ -80,7 +80,7 @@ function OccupancyPage() {
     [beds],
   )
 
-  /** Beds that aren't empty yet — someone has given notice. Future inventory. */
+  /** Beds that aren't empty yet: someone has given notice. Future inventory. */
   const upcoming = useMemo(
     () =>
       (beds ?? [])
@@ -103,7 +103,7 @@ function OccupancyPage() {
             <h1 className="text-2xl font-display font-bold">Occupancy Engine</h1>
           </div>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            A PG doesn&apos;t sell leads — it sells bed-nights, and a bed-night is
+            A PG doesn&apos;t sell leads. It sells bed-nights, and a bed-night is
             perishable. An empty bed last night can never be sold again. This screen
             shows what that is costing right now.
           </p>
@@ -116,7 +116,7 @@ function OccupancyPage() {
               Could not reach the database
             </div>
             <p className="mt-1 text-muted-foreground">
-              {(error as Error).message} — check that{' '}
+              {(error as Error).message}. Check that{' '}
               <code className="rounded bg-muted px-1">VITE_SUPABASE_URL</code> and{' '}
               <code className="rounded bg-muted px-1">VITE_SUPABASE_PUBLISHABLE_KEY</code>{' '}
               point at your project and that the migrations have been run.
@@ -168,7 +168,7 @@ function OccupancyPage() {
             icon={CalendarClock}
             label="On notice"
             value={String(stats.bedsOnNotice)}
-            sub="Future inventory — sell these now"
+            sub="Future inventory, sell these now"
             tone="warn"
           />
           <StatTile
@@ -200,7 +200,7 @@ function OccupancyPage() {
                 : bleeding.map((b) => <BleedingRow key={b.bed_id} bed={b} />)}
               {!isLoading && bleeding.length === 0 ? (
                 <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  No empty beds. That&apos;s 100% occupancy — enjoy it.
+                  No empty beds. That&apos;s 100% occupancy. Enjoy it.
                 </div>
               ) : null}
             </div>

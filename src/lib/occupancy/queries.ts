@@ -2,7 +2,7 @@
  * Data access for the Occupancy Engine.
  *
  * Everything on our five screens comes through here, and every one of these
- * hits Postgres. Nothing is mocked — that's the whole point of the exercise.
+ * hits Postgres. Nothing is mocked. That's the whole point of the exercise.
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -44,7 +44,7 @@ function unwrap<T>({ data, error }: { data: T | null; error: any }): T {
  * Fail fast rather than retrying into a spinner.
  *
  * The common failure here isn't a flaky network, it's a `.env` pointing at the
- * wrong project — and retrying that three times with backoff just means the
+ * wrong project, and retrying that three times with backoff just means the
  * user stares at a skeleton for half a minute instead of reading the error.
  * One retry, then surface it.
  */
@@ -58,7 +58,7 @@ async function withTimeout<T>(p: PromiseLike<T>, ms = 8000): Promise<T> {
   let timer: ReturnType<typeof setTimeout>
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(
-      () => reject(new Error(`Request timed out after ${ms / 1000}s — check VITE_SUPABASE_URL`)),
+      () => reject(new Error(`Request timed out after ${ms / 1000}s. Check VITE_SUPABASE_URL`)),
       ms,
     )
   })
@@ -117,7 +117,7 @@ export function useLeadActivities(id: string | undefined) {
 
 /**
  * The flattened inventory view. `available_from`, `days_vacant` and
- * `revenue_lost` are all computed in Postgres, not in the browser — so this
+ * `revenue_lost` are all computed in Postgres, not in the browser, so this
  * behaves the same whether there are 120 beds or 12,000.
  */
 export function useBedAvailability() {
@@ -155,12 +155,12 @@ export function useOpenTasks() {
 }
 
 // ---------------------------------------------------------------------------
-// Writes — these are the proof it's a real backend
+// Writes: these are the proof it's a real backend
 // ---------------------------------------------------------------------------
 
 /**
  * Moving a lead through the pipeline. Also writes an activity row, so the
- * timeline records who moved it and when — a stage change with no audit trail
+ * timeline records who moved it and when. A stage change with no audit trail
  * is how CRMs end up untrustworthy.
  */
 export function useUpdateLeadStage() {

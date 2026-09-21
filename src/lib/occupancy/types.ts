@@ -1,5 +1,5 @@
 /**
- * Occupancy Engine — domain types.
+ * Occupancy Engine domain types.
  *
  * These mirror supabase/migrations/0001_occupancy_engine.sql.
  * The generated `integrations/supabase/types.ts` doesn't know about these
@@ -104,7 +104,7 @@ export interface Task {
 }
 
 /**
- * A row of the `bed_availability` view — the flattened inventory chain
+ * A row of the `bed_availability` view: the flattened inventory chain
  * (property -> room -> bed) plus the computed availability + loss fields.
  */
 export interface BedAvailability {
