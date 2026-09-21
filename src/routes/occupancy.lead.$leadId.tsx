@@ -2,19 +2,28 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import {
-  ArrowLeft,
+  ArrowRightLeft,
   BedDouble,
-  Clock,
-  MessageSquare,
+  Check,
+  ChevronRight,
+  MapPin,
+  MessageCircle,
+  NotebookPen,
   Phone,
-  Sparkles,
 } from 'lucide-react'
 import { AppShell } from '@/components/AppShell'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Skeleton } from '@/components/ui/skeleton'
+import {
+  CARD,
+  PAGE,
+  Avatar,
+  BackLink,
+  Dot,
+  EmptyNote,
+  ErrorNote,
+  PageHeader,
+  Shimmer,
+} from '@/components/occupancy/ui'
+import { ScoreRing, scoreText } from '@/components/occupancy/match-bits'
 import {
   useBedAvailability,
   useLead,
@@ -24,10 +33,9 @@ import {
 } from '@/lib/occupancy/queries'
 import { bestBedsForLead } from '@/lib/occupancy/matching'
 import { rescueScore } from '@/lib/occupancy/rescue'
-import { inr, relativeDays, shortDate } from '@/lib/occupancy/format'
+import { inr, relativeDays, shortDate, shortProperty } from '@/lib/occupancy/format'
 import { LEAD_STAGES, STAGE_LABELS } from '@/lib/occupancy/types'
-import type { LeadStage } from '@/lib/occupancy/types'
-import { ReasonList, ScoreBar, ScorePill } from '@/components/occupancy/match-bits'
+import type { Activity, LeadStage } from '@/lib/occupancy/types'
 
 export const Route = createFileRoute('/occupancy/lead/$leadId')({
   head: () => ({
@@ -39,9 +47,58 @@ export const Route = createFileRoute('/occupancy/lead/$leadId')({
   component: LeadPage,
 })
 
+const RISK = {
+  critical: {
+    chip: 'bg-[#fff0ee] text-[#d53a35]',
+    ring: '#e12527',
+    text: 'text-[#d53a35]',
+    label: 'Critical risk',
+    line: 'At real risk of going quiet. Reach out today.',
+  },
+  warm: {
+    chip: 'bg-[#fff7e7] text-[#c98218]',
+    ring: '#e5a135',
+    text: 'text-[#c98218]',
+    label: 'Warm risk',
+    line: 'Worth a nudge soon. Keep the conversation moving.',
+  },
+  ok: {
+    chip: 'bg-[#edf8f1] text-[#24805b]',
+    ring: '#48b878',
+    text: 'text-[#24805b]',
+    label: 'Low risk',
+    line: 'In good shape. Keep the next step clear.',
+  },
+  cold: {
+    chip: 'bg-[#f2f0ed] text-[#646971]',
+    ring: '#b9b3ad',
+    text: 'text-[#646971]',
+    label: 'Gone cold',
+    line: 'No contact in weeks and no near move-in. Probably found somewhere else. Worth one last message.',
+  },
+} as const
+
+const ACTIVITY_ICON: Record<Activity['type'], { icon: typeof Phone; cls: string }> = {
+  call: { icon: Phone, cls: 'bg-[#eaf0fa] text-[#0943a0]' },
+  whatsapp: { icon: MessageCircle, cls: 'bg-[#e9f8ef] text-[#24925d]' },
+  email: { icon: NotebookPen, cls: 'bg-[#f2f0ed] text-[#646971]' },
+  visit: { icon: MapPin, cls: 'bg-[#f3effb] text-[#7457a8]' },
+  note: { icon: NotebookPen, cls: 'bg-[#f2f0ed] text-[#646971]' },
+  stage_change: { icon: ArrowRightLeft, cls: 'bg-[#eef4fb] text-[#5077a7]' },
+}
+
+function activityText(a: Activity): string {
+  if (a.type === 'stage_change' && a.outcome && a.outcome in STAGE_LABELS) {
+    return `Lead moved to ${STAGE_LABELS[a.outcome as LeadStage]}`
+  }
+  if (a.notes) return a.notes
+  const kind = a.type === 'whatsapp' ? 'WhatsApp' : a.type.charAt(0).toUpperCase() + a.type.slice(1)
+  return a.outcome ? `${kind}, ${a.outcome.replace(/_/g, ' ')}` : kind
+}
+
 function LeadPage() {
   const { leadId } = Route.useParams()
-  const { data: lead, isLoading } = useLead(leadId)
+  const { data: lead, isLoading, error } = useLead(leadId)
   const { data: activities } = useLeadActivities(leadId)
   const { data: beds } = useBedAvailability()
 
@@ -49,37 +106,42 @@ function LeadPage() {
   const logActivity = useLogActivity()
   const [note, setNote] = useState('')
 
-  // DIRECTION 1 of the match engine: start from the lead, find the beds.
+  // Direction 1 of the match engine: start from the lead, find the beds.
   const matches = useMemo(
     () => (lead && beds ? bestBedsForLead(lead, beds, 4) : []),
     [lead, beds],
   )
-
   const risk = useMemo(() => (lead ? rescueScore(lead) : null), [lead])
 
   if (isLoading) {
     return (
       <AppShell>
-        <div className="mx-auto w-full max-w-5xl px-4 py-6">
-          <Skeleton className="h-40 w-full" />
+        <div className={PAGE}>
+          <Shimmer className="mb-6 h-24" />
+          <Shimmer className="h-48" />
         </div>
       </AppShell>
     )
   }
 
-  if (!lead) {
+  if (!lead || !risk) {
     return (
       <AppShell>
-        <div className="mx-auto w-full max-w-5xl px-4 py-6">
-          <Card className="p-8 text-center text-sm text-muted-foreground">
-            Lead not found.
-          </Card>
+        <div className={PAGE}>
+          <BackLink to="/occupancy/pipeline">Back to lead pipeline</BackLink>
+          {error ? <ErrorNote error={error} /> : <EmptyNote>Lead not found.</EmptyNote>}
         </div>
       </AppShell>
     )
   }
 
+  const r = RISK[risk.band]
+  const firstName = lead.name.split(' ')[0]
+  const currentIdx = LEAD_STAGES.indexOf(lead.stage)
+  const isLost = lead.stage === 'lost'
+
   const handleStage = (stage: LeadStage) => {
+    if (stage === lead.stage) return
     updateStage.mutate(
       { leadId: lead.id, stage },
       {
@@ -89,9 +151,9 @@ function LeadPage() {
     )
   }
 
-  const handleLog = (type: 'call' | 'whatsapp' | 'note') => {
+  const handleLog = (type: 'call' | 'whatsapp') => {
     logActivity.mutate(
-      { leadId: lead.id, type, notes: note || undefined },
+      { leadId: lead.id, type, notes: note.trim() || undefined },
       {
         onSuccess: () => {
           toast.success('Logged')
@@ -104,198 +166,284 @@ function LeadPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
-        <Link
-          to="/occupancy/pipeline"
-          className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Pipeline
-        </Link>
+      <div className={PAGE}>
+        <BackLink to="/occupancy/pipeline">Back to lead pipeline</BackLink>
 
-        {/* ---- Header --------------------------------------------------- */}
-        <Card className="mb-4 p-5">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="text-xl font-display font-bold">{lead.name}</h1>
-              <div className="mt-1 text-sm text-muted-foreground">
-                Budget {inr(lead.budget_max)} ·{' '}
-                {lead.preferred_localities?.join(', ') || 'anywhere'} ·{' '}
-                {lead.preferred_sharing ?? 'any'} sharing · {lead.gender ?? '—'}
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                Moving {shortDate(lead.move_in_date)} · from {lead.source} · owned by{' '}
-                {lead.owner_name ?? 'nobody'}
-              </div>
-              {lead.phone ? (
-                <Button size="sm" variant="outline" className="mt-3" asChild>
-                  <a href={`tel:${lead.phone}`}>
-                    <Phone className="mr-1.5 h-3 w-3" /> {lead.phone}
-                  </a>
-                </Button>
-              ) : null}
-            </div>
+        <PageHeader
+          eyebrow={`Lead detail · risk score ${risk.risk}`}
+          title={lead.name}
+          subtitle={r.line}
+          actions={
+            lead.phone ? (
+              <a
+                href={`tel:${lead.phone}`}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#171b20] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#2b3037]"
+              >
+                <Phone className="h-3.5 w-3.5" />
+                Call lead
+              </a>
+            ) : undefined
+          }
+        />
 
-            {risk ? (
-              <div className="text-right">
-                <div
-                  className={`text-2xl font-bold tabular-nums ${
-                    risk.band === 'critical'
-                      ? 'text-red-500'
-                      : risk.band === 'warm'
-                        ? 'text-amber-500'
-                        : 'text-emerald-500'
-                  }`}
-                >
-                  {risk.risk}
-                </div>
-                <div className="text-xs text-muted-foreground">risk of loss</div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  contacted {relativeDays(lead.last_contacted_at)}
-                </div>
+        {/* ---- Profile ---------------------------------------------------- */}
+        <section className={`${CARD} p-5 sm:p-6`}>
+          <div className="flex flex-wrap items-center gap-4">
+            <Avatar name={lead.name} size="lg" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-display text-2xl font-bold tracking-[-0.04em]">{lead.name}</h2>
+                <span className={`rounded-md px-2 py-1 text-[10px] font-bold ${r.chip}`}>
+                  {r.label}
+                </span>
               </div>
-            ) : null}
-          </div>
-
-          {/* ---- Stage picker: this write is the "it's real" proof ----- */}
-          <div className="mt-4 border-t pt-4">
-            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Pipeline stage
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {LEAD_STAGES.map((s) => (
-                <button
-                  key={s}
-                  disabled={updateStage.isPending}
-                  onClick={() => handleStage(s)}
-                  className={`rounded-md border px-2.5 py-1 text-xs transition-colors disabled:opacity-50 ${
-                    lead.stage === s
-                      ? 'border-accent bg-accent text-accent-foreground'
-                      : 'hover:bg-muted'
-                  }`}
-                >
-                  {STAGE_LABELS[s]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        <div className="grid gap-4 lg:grid-cols-2">
-          {/* ---- Matched beds ------------------------------------------ */}
-          <Card>
-            <div className="border-b px-5 py-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-accent" />
-                <h2 className="text-sm font-semibold">Beds that fit {lead.name.split(' ')[0]}</h2>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Scored on budget, locality, availability and sharing type. Gender is a
-                hard filter, not a score.
+              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-[#777c83]">
+                {lead.phone ? (
+                  <>
+                    <Phone className="h-3 w-3" />
+                    {lead.phone}
+                    <span className="text-[#d0cbc5]">•</span>
+                  </>
+                ) : null}
+                <span className="capitalize">{lead.source ?? 'unknown'} lead</span>
+                <span className="text-[#d0cbc5]">•</span>
+                contacted {relativeDays(lead.last_contacted_at)}
               </p>
             </div>
-            {matches.length === 0 ? (
-              <div className="px-5 py-10 text-center text-sm text-muted-foreground">
-                <BedDouble className="mx-auto mb-2 h-5 w-5 opacity-50" />
-                Nothing available fits this lead right now.
-              </div>
-            ) : (
-              <div className="divide-y">
-                {matches.map(({ bed, score, reasons }) => (
-                  <div key={bed.bed_id} className="px-5 py-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <Link
-                          to="/occupancy/bed/$bedId"
-                          params={{ bedId: bed.bed_id }}
-                          className="text-sm font-medium hover:underline"
-                        >
-                          {bed.property_name}
-                        </Link>
-                        <div className="mt-0.5 text-xs text-muted-foreground">
-                          Room {bed.room_number}
-                          {bed.bed_label} · {bed.sharing_type} · {inr(bed.monthly_rent)}/mo
-                        </div>
-                      </div>
-                      <ScorePill score={score} />
-                    </div>
-                    <div className="mt-3">
-                      <ScoreBar score={score} />
-                    </div>
-                    <ReasonList reasons={reasons} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-
-          {/* ---- Activity timeline ------------------------------------- */}
-          <Card>
-            <div className="border-b px-5 py-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-accent" />
-                <h2 className="text-sm font-semibold">Activity</h2>
-              </div>
-            </div>
-
-            <div className="border-b px-5 py-4">
-              <Textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="What happened on this call?"
-                rows={2}
-                className="text-sm"
+            <div className="flex items-center gap-3">
+              <ScoreRing
+                score={risk.risk}
+                color={r.ring}
+                label={`Risk of loss ${risk.risk} out of 100`}
               />
-              <div className="mt-2 flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={logActivity.isPending}
-                  onClick={() => handleLog('call')}
-                >
-                  <Phone className="mr-1.5 h-3 w-3" /> Log call
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={logActivity.isPending}
-                  onClick={() => handleLog('whatsapp')}
-                >
-                  <MessageSquare className="mr-1.5 h-3 w-3" /> Log WhatsApp
-                </Button>
+              <div className="hidden sm:block">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-[#8b8f95]">Risk of loss</p>
+                <ul className="mt-1 space-y-0.5">
+                  {risk.reasons.slice(0, 2).map((reason) => (
+                    <li key={reason} className={`text-xs font-bold ${r.text}`}>
+                      {reason}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-4 border-t border-[#f0ece8] pt-5 sm:grid-cols-4">
+            <Fact label="Budget" value={`${inr(lead.budget_max)} / month`} />
+            <Fact label="Wants" value={lead.preferred_localities?.join(', ') || 'Anywhere'} />
+            <Fact
+              label="Move-in"
+              value={`${shortDate(lead.move_in_date)} · ${lead.preferred_sharing ?? 'any'} sharing`}
+            />
+            <Fact label="Owner" value={lead.owner_name ?? 'Unassigned'} />
+          </div>
+        </section>
 
-            <div className="max-h-[420px] divide-y overflow-y-auto">
-              {(activities ?? []).map((a) => (
-                <div key={a.id} className="px-5 py-3">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px]">
-                      {a.type}
-                    </Badge>
-                    {a.outcome ? (
-                      <span className="text-xs text-muted-foreground">{a.outcome}</span>
-                    ) : null}
-                    <span className="ml-auto text-[11px] text-muted-foreground">
-                      {relativeDays(a.created_at)}
-                    </span>
-                  </div>
-                  {a.notes ? <p className="mt-1 text-sm">{a.notes}</p> : null}
-                  {a.created_by ? (
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">
-                      by {a.created_by}
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-              {(activities ?? []).length === 0 ? (
-                <div className="px-5 py-10 text-center text-sm text-muted-foreground">
-                  Nothing logged yet. That&apos;s usually how leads get lost.
-                </div>
-              ) : null}
+        {/* ---- Pipeline stepper: this write is the "it's real" proof ------- */}
+        <section className={`${CARD} mt-4 p-5 sm:p-6`}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#8b8f95]">Pipeline</p>
+              <p className="mt-1 text-sm text-[#646971]">Click any stage to move this lead.</p>
             </div>
-          </Card>
+            <span className="shrink-0 rounded-lg bg-[#eaf0fa] px-2 py-1 text-[10px] font-bold text-[#0943a0]">
+              Current: {STAGE_LABELS[lead.stage]}
+            </span>
+          </div>
+          <div className="mt-6 overflow-x-auto pb-1">
+            <div className="flex min-w-[690px] items-center">
+              {LEAD_STAGES.map((stage, i) => {
+                const state =
+                  stage === lead.stage
+                    ? isLost
+                      ? 'lost'
+                      : 'current'
+                    : !isLost && i < currentIdx
+                      ? 'done'
+                      : 'todo'
+                const circle = {
+                  done: 'border-[#48b878] bg-[#edf8f1] text-[#24805b]',
+                  current: 'border-[#0943a0] bg-white text-[#0943a0]',
+                  lost: 'border-[#e12527] bg-[#fff0ee] text-[#d53a35]',
+                  todo: 'border-[#e4e0dd] bg-white text-[#9ca1a6]',
+                }[state]
+                const labelCls = {
+                  done: 'text-[#24805b]',
+                  current: 'text-[#0943a0]',
+                  lost: 'text-[#d53a35]',
+                  todo: 'text-[#9ca1a6]',
+                }[state]
+                return (
+                  <div
+                    key={stage}
+                    className={`flex items-center ${i < LEAD_STAGES.length - 1 ? 'flex-1' : ''}`}
+                  >
+                    <button
+                      type="button"
+                      disabled={updateStage.isPending}
+                      onClick={() => handleStage(stage)}
+                      aria-current={stage === lead.stage ? 'step' : undefined}
+                      className={`group flex flex-col items-center gap-2 text-center text-[10px] font-bold transition disabled:opacity-60 ${labelCls}`}
+                    >
+                      <span
+                        className={`grid h-7 w-7 place-items-center rounded-full border-2 transition group-hover:border-[#0943a0] ${circle}`}
+                      >
+                        {state === 'done' ? <Check className="h-3.5 w-3.5" /> : i + 1}
+                      </span>
+                      <span className="whitespace-nowrap">{STAGE_LABELS[stage]}</span>
+                    </button>
+                    {i < LEAD_STAGES.length - 1 ? (
+                      <div
+                        className={`mx-2 mb-5 h-px flex-1 ${
+                          !isLost && i < currentIdx ? 'bg-[#82d2a3]' : 'bg-[#e4e0dd]'
+                        }`}
+                      />
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-4 grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
+          {/* ---- Best beds ------------------------------------------------ */}
+          <section className={`${CARD} p-5 sm:p-6`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-xl font-bold tracking-[-0.035em]">
+                  Best beds for {firstName}
+                </h2>
+                <p className="mt-1 text-xs text-[#8b8f95]">
+                  Ranked on budget, locality, move-in date and sharing type.
+                </p>
+              </div>
+              <span className="shrink-0 rounded-full bg-[#f7f3ef] px-2 py-1 text-[10px] font-bold text-[#646971]">
+                {matches.length} match{matches.length === 1 ? '' : 'es'}
+              </span>
+            </div>
+            <div className="mt-4 space-y-3">
+              {matches.length === 0 ? (
+                <EmptyNote>
+                  <BedDouble className="mx-auto mb-2 h-5 w-5 opacity-50" />
+                  Nothing available fits {firstName} right now.
+                </EmptyNote>
+              ) : (
+                matches.map(({ bed, score, reasons }) => (
+                  <Link
+                    key={bed.bed_id}
+                    to="/occupancy/bed/$bedId"
+                    params={{ bedId: bed.bed_id }}
+                    className="group flex items-center gap-3 rounded-xl border border-[#eee9e5] p-3.5 transition hover:border-[#bccdea] hover:bg-[#f6f8fc]"
+                  >
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#eaf0fa] text-[#0943a0]">
+                      <BedDouble className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-bold group-hover:text-[#0943a0]">
+                        {shortProperty(bed.property_name)} · Room {bed.room_number}
+                        {bed.bed_label}
+                      </p>
+                      <p className="mt-1 truncate text-[11px] text-[#8b8f95]">
+                        <span className="capitalize">{bed.sharing_type}</span>
+                        <Dot />
+                        {inr(bed.monthly_rent)}
+                        <Dot />
+                        {bed.status === 'vacant'
+                          ? 'available now'
+                          : `available ${shortDate(bed.available_from)}`}
+                      </p>
+                      <p className="mt-1 truncate text-[10px] text-[#a5a9ae]">
+                        {reasons.map((x) => x.detail).slice(0, 2).join(' · ')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-display text-lg font-bold ${scoreText(score)}`}>{score}</p>
+                      <p className="text-[10px] text-[#8b8f95]">
+                        {bed.status === 'vacant'
+                          ? `${inr(Number(bed.revenue_lost))} at risk`
+                          : 'fit score'}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-[#c9c2bc]" />
+                  </Link>
+                ))
+              )}
+            </div>
+          </section>
+
+          {/* ---- Activity --------------------------------------------------- */}
+          <section className={`${CARD} p-5 sm:p-6`}>
+            <h2 className="font-display text-xl font-bold tracking-[-0.035em]">Log an activity</h2>
+            <p className="mt-1 text-xs text-[#8b8f95]">Keep the lead context fresh.</p>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="What happened on the call?"
+              aria-label="Activity note"
+              className="mt-5 min-h-[98px] w-full resize-none rounded-xl border border-[#e4e0dd] bg-[#fcf9f7] p-3 text-xs outline-none transition placeholder:text-[#a5a9ae] focus:border-[#0943a0] focus:ring-2 focus:ring-[#0943a0]/10"
+            />
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={logActivity.isPending}
+                onClick={() => handleLog('call')}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#e4e0dd] px-3 py-2.5 text-xs font-bold text-[#3c4248] transition hover:border-[#0943a0] hover:text-[#0943a0] disabled:opacity-60"
+              >
+                <Phone className="h-3.5 w-3.5" /> Log call
+              </button>
+              <button
+                type="button"
+                disabled={logActivity.isPending}
+                onClick={() => handleLog('whatsapp')}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#e9f8ef] px-3 py-2.5 text-xs font-bold text-[#24925d] transition hover:bg-[#d9f2e3] disabled:opacity-60"
+              >
+                <MessageCircle className="h-3.5 w-3.5" /> Log WhatsApp
+              </button>
+            </div>
+
+            <div className="mt-6 border-t border-[#f0ece8] pt-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8b8f95]">
+                Recent activity
+              </p>
+              <div className="mt-4 max-h-[360px] space-y-4 overflow-y-auto pr-1">
+                {(activities ?? []).map((a) => {
+                  const { icon: Icon, cls } = ACTIVITY_ICON[a.type]
+                  return (
+                    <div key={a.id} className="flex gap-3">
+                      <span
+                        className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full ${cls}`}
+                      >
+                        <Icon className="h-3 w-3" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold">{activityText(a)}</p>
+                        <p className="mt-1 text-[10px] text-[#8b8f95]">
+                          {a.created_by ?? 'Someone'} · {relativeDays(a.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+                {(activities ?? []).length === 0 ? (
+                  <p className="text-xs text-[#8b8f95]">
+                    Nothing logged yet. That&apos;s usually how leads get lost.
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </AppShell>
+  )
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#8b8f95]">{label}</p>
+      <p className="mt-1.5 truncate text-sm font-bold">{value}</p>
+    </div>
   )
 }
