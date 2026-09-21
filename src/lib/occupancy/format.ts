@@ -33,3 +33,40 @@ export function daysUntil(iso: string | null | undefined): number | null {
   if (!iso) return null
   return Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000)
 }
+
+/** Compact thousands for chart labels: ₹20.2k. */
+export function inrK(n: number): string {
+  if (Math.abs(n) < 1000) return '₹' + Math.round(n)
+  return '₹' + (n / 1000).toFixed(1) + 'k'
+}
+
+/** "Gharpayy HSR Sector 2" -> "HSR Sector 2". Every property carries the brand. */
+export function shortProperty(name: string): string {
+  return name.replace(/^Gharpayy\s+/i, '')
+}
+
+export function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join('')
+}
+
+/** Task due times: "Today, 10:30 AM", "Tomorrow, 9:00 AM", "24 Sept, 4:00 PM". */
+export function dueLabel(iso: string): string {
+  const d = new Date(iso)
+  const time = d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true })
+  const start = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+  const diff = Math.round((start(d) - start(new Date())) / 86_400_000)
+  if (diff === 0) return `Today, ${time}`
+  if (diff === 1) return `Tomorrow, ${time}`
+  if (diff === -1) return `Yesterday, ${time}`
+  return `${shortDate(iso)}, ${time}`
+}
+
+/** Digits only, for wa.me links. */
+export function waNumber(phone: string): string {
+  return phone.replace(/\D/g, '')
+}
