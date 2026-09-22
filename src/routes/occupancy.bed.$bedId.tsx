@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   CalendarDays,
+  CheckCircle2,
   MapPin,
   MessageCircle,
   Phone,
@@ -22,6 +23,7 @@ import {
   StageChip,
 } from '@/components/occupancy/ui'
 import { ReasonGrid, ScoreRing } from '@/components/occupancy/match-bits'
+import { SellDialog, type SellTarget } from '@/components/occupancy/sell-dialog'
 import { useBedAvailability, useLeads } from '@/lib/occupancy/queries'
 import { bestLeadsForBed } from '@/lib/occupancy/matching'
 import type { BedAvailability, Lead } from '@/lib/occupancy/types'
@@ -30,7 +32,7 @@ import { daysUntil, inr, shortDate, shortProperty, waNumber } from '@/lib/occupa
 export const Route = createFileRoute('/occupancy/bed/$bedId')({
   head: () => ({
     meta: [
-      { title: 'Bed — Occupancy Engine' },
+      { title: 'Bed | Gharpayy' },
       {
         name: 'description',
         content: 'Who is waiting that would take this bed, ranked with reasons.',
@@ -59,6 +61,7 @@ function BedPage() {
   const { bedId } = Route.useParams()
   const { data: beds, isLoading: bedsLoading, error } = useBedAvailability()
   const { data: leads, isLoading: leadsLoading } = useLeads()
+  const [sellTarget, setSellTarget] = useState<SellTarget | null>(null)
 
   const bed = useMemo(() => (beds ?? []).find((b) => b.bed_id === bedId), [beds, bedId])
 
@@ -113,17 +116,31 @@ function BedPage() {
           title={`Room ${bed.room_number}, bed ${bed.bed_label}`}
           subtitle={subtitle}
           actions={
-            matches.length > 0 ? (
-              <a
-                href="#matches"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#f4c024] px-4 py-2.5 text-xs font-bold text-[#171b20] shadow-[0_7px_18px_rgba(9,67,160,0.22)] transition hover:brightness-105"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                See best matches
-              </a>
-            ) : undefined
+            <>
+              {matches.length > 0 ? (
+                <a
+                  href="#matches"
+                  className="inline-flex items-center gap-2 rounded-xl border border-[var(--oc-border)] bg-[var(--oc-card)] px-4 py-2.5 text-xs font-bold text-[var(--oc-text-2)] transition hover:border-[var(--oc-brand)] hover:text-[var(--oc-brand)]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Best matches
+                </a>
+              ) : null}
+              {vacant ? (
+                <button
+                  type="button"
+                  onClick={() => setSellTarget({ beds: [bed], label: `Room ${bed.room_number}${bed.bed_label}` })}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#f4c024] px-4 py-2.5 text-xs font-bold text-[#171b20] shadow-[0_7px_18px_rgba(9,67,160,0.22)] transition hover:brightness-105"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Mark as sold
+                </button>
+              ) : null}
+            </>
           }
         />
+
+        <SellDialog target={sellTarget} onClose={() => setSellTarget(null)} />
 
         {/* ---- Hero ------------------------------------------------------- */}
         <section className="relative overflow-hidden rounded-3xl bg-[#0943a0] p-5 text-white shadow-[0_16px_34px_rgba(9,67,160,0.28)] sm:p-7">

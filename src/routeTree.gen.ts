@@ -103,7 +103,9 @@ import { Route as OwnerBlocksRouteImport } from './routes/owner/blocks'
 import { Route as OccupancyRescueRouteImport } from './routes/occupancy.rescue'
 import { Route as OccupancyRadarRouteImport } from './routes/occupancy.radar'
 import { Route as OccupancyPipelineRouteImport } from './routes/occupancy.pipeline'
+import { Route as OccupancyOwnerRouteImport } from './routes/occupancy.owner'
 import { Route as OccupancyInventoryRouteImport } from './routes/occupancy.inventory'
+import { Route as OccupancyAdminRouteImport } from './routes/occupancy.admin'
 import { Route as MytZonesRouteImport } from './routes/myt/zones'
 import { Route as MytWarRoomRouteImport } from './routes/myt/war-room'
 import { Route as MytToursRouteImport } from './routes/myt/tours'
@@ -624,9 +626,19 @@ const OccupancyPipelineRoute = OccupancyPipelineRouteImport.update({
   path: '/occupancy/pipeline',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OccupancyOwnerRoute = OccupancyOwnerRouteImport.update({
+  id: '/occupancy/owner',
+  path: '/occupancy/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OccupancyInventoryRoute = OccupancyInventoryRouteImport.update({
   id: '/occupancy/inventory',
   path: '/occupancy/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OccupancyAdminRoute = OccupancyAdminRouteImport.update({
+  id: '/occupancy/admin',
+  path: '/occupancy/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MytZonesRoute = MytZonesRouteImport.update({
@@ -966,7 +978,9 @@ export interface FileRoutesByFullPath {
   '/myt/tours': typeof MytToursRoute
   '/myt/war-room': typeof MytWarRoomRoute
   '/myt/zones': typeof MytZonesRoute
+  '/occupancy/admin': typeof OccupancyAdminRoute
   '/occupancy/inventory': typeof OccupancyInventoryRoute
+  '/occupancy/owner': typeof OccupancyOwnerRoute
   '/occupancy/pipeline': typeof OccupancyPipelineRoute
   '/occupancy/radar': typeof OccupancyRadarRoute
   '/occupancy/rescue': typeof OccupancyRescueRoute
@@ -1110,7 +1124,9 @@ export interface FileRoutesByTo {
   '/myt/tours': typeof MytToursRoute
   '/myt/war-room': typeof MytWarRoomRoute
   '/myt/zones': typeof MytZonesRoute
+  '/occupancy/admin': typeof OccupancyAdminRoute
   '/occupancy/inventory': typeof OccupancyInventoryRoute
+  '/occupancy/owner': typeof OccupancyOwnerRoute
   '/occupancy/pipeline': typeof OccupancyPipelineRoute
   '/occupancy/radar': typeof OccupancyRadarRoute
   '/occupancy/rescue': typeof OccupancyRescueRoute
@@ -1257,7 +1273,9 @@ export interface FileRoutesById {
   '/myt/tours': typeof MytToursRoute
   '/myt/war-room': typeof MytWarRoomRoute
   '/myt/zones': typeof MytZonesRoute
+  '/occupancy/admin': typeof OccupancyAdminRoute
   '/occupancy/inventory': typeof OccupancyInventoryRoute
+  '/occupancy/owner': typeof OccupancyOwnerRoute
   '/occupancy/pipeline': typeof OccupancyPipelineRoute
   '/occupancy/radar': typeof OccupancyRadarRoute
   '/occupancy/rescue': typeof OccupancyRescueRoute
@@ -1405,7 +1423,9 @@ export interface FileRouteTypes {
     | '/myt/tours'
     | '/myt/war-room'
     | '/myt/zones'
+    | '/occupancy/admin'
     | '/occupancy/inventory'
+    | '/occupancy/owner'
     | '/occupancy/pipeline'
     | '/occupancy/radar'
     | '/occupancy/rescue'
@@ -1549,7 +1569,9 @@ export interface FileRouteTypes {
     | '/myt/tours'
     | '/myt/war-room'
     | '/myt/zones'
+    | '/occupancy/admin'
     | '/occupancy/inventory'
+    | '/occupancy/owner'
     | '/occupancy/pipeline'
     | '/occupancy/radar'
     | '/occupancy/rescue'
@@ -1695,7 +1717,9 @@ export interface FileRouteTypes {
     | '/myt/tours'
     | '/myt/war-room'
     | '/myt/zones'
+    | '/occupancy/admin'
     | '/occupancy/inventory'
+    | '/occupancy/owner'
     | '/occupancy/pipeline'
     | '/occupancy/radar'
     | '/occupancy/rescue'
@@ -1826,7 +1850,9 @@ export interface RootRouteChildren {
   MytToursRoute: typeof MytToursRoute
   MytWarRoomRoute: typeof MytWarRoomRoute
   MytZonesRoute: typeof MytZonesRoute
+  OccupancyAdminRoute: typeof OccupancyAdminRoute
   OccupancyInventoryRoute: typeof OccupancyInventoryRoute
+  OccupancyOwnerRoute: typeof OccupancyOwnerRoute
   OccupancyPipelineRoute: typeof OccupancyPipelineRoute
   OccupancyRadarRoute: typeof OccupancyRadarRoute
   OccupancyRescueRoute: typeof OccupancyRescueRoute
@@ -2517,11 +2543,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OccupancyPipelineRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/occupancy/owner': {
+      id: '/occupancy/owner'
+      path: '/occupancy/owner'
+      fullPath: '/occupancy/owner'
+      preLoaderRoute: typeof OccupancyOwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/occupancy/inventory': {
       id: '/occupancy/inventory'
       path: '/occupancy/inventory'
       fullPath: '/occupancy/inventory'
       preLoaderRoute: typeof OccupancyInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/occupancy/admin': {
+      id: '/occupancy/admin'
+      path: '/occupancy/admin'
+      fullPath: '/occupancy/admin'
+      preLoaderRoute: typeof OccupancyAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/myt/zones': {
@@ -3079,7 +3119,9 @@ const rootRouteChildren: RootRouteChildren = {
   MytToursRoute: MytToursRoute,
   MytWarRoomRoute: MytWarRoomRoute,
   MytZonesRoute: MytZonesRoute,
+  OccupancyAdminRoute: OccupancyAdminRoute,
   OccupancyInventoryRoute: OccupancyInventoryRoute,
+  OccupancyOwnerRoute: OccupancyOwnerRoute,
   OccupancyPipelineRoute: OccupancyPipelineRoute,
   OccupancyRadarRoute: OccupancyRadarRoute,
   OccupancyRescueRoute: OccupancyRescueRoute,
