@@ -4,7 +4,7 @@ import {
   Building2, Search, Sun, Command, Trophy, Sparkles, MessageSquare,
   IndianRupee, MapPin, Zap, Users, Home, Calendar, Store, Swords, Settings, AlertTriangle,
   ShieldCheck, Inbox, Camera, HelpCircle, Layers, HeartPulse, ClipboardCheck, ListChecks, Timer,
-  Compass, Gauge, Radar, Flame, BedDouble,
+  Compass, Gauge, Radar, Flame, BedDouble, KeyRound, LayoutGrid,
 } from "lucide-react";
 import { NotificationCenter } from "./NotificationCenter";
 import { ProfileMenu } from "./ProfileMenu";
@@ -20,7 +20,7 @@ import { useNow, useMountedNow } from "@/hooks/use-now";
 import { buildDoNextQueue } from "@/lib/engine";
 import { useGame, whoKey } from "@/lib/gamification";
 import { useCRM10x } from "@/lib/crm10x/store";
-import { useEffect, useMemo } from "react";
+import { Fragment, useEffect, useMemo } from "react";
 import { PictureInPictureProvider, PipMount, usePip } from "./pip/PipProvider";
 import { PipButton } from "./pip/PipButton";
 import { usePipRouteSync } from "./pip/usePipSync";
@@ -35,7 +35,18 @@ function PipRouteSyncBridge() {
   return null;
 }
 
-type NavItem = { to: string; label: string; icon: typeof Target; badge?: number; accent?: boolean };
+type NavItem = { to: string; label: string; icon: typeof Target; badge?: number; accent?: boolean; group?: string };
+
+// The occupancy screens run on the real Postgres backend; they lead every role's sidebar.
+const occupancyNav: NavItem[] = [
+  { to: "/occupancy", label: "Occupancy Engine", icon: Gauge, group: "Occupancy" },
+  { to: "/occupancy/radar", label: "Vacancy Radar", icon: Radar, group: "Occupancy" },
+  { to: "/occupancy/rescue", label: "Rescue List", icon: Flame, group: "Occupancy" },
+  { to: "/occupancy/pipeline", label: "Lead Pipeline", icon: Users, group: "Occupancy" },
+  { to: "/occupancy/inventory", label: "Bed Inventory", icon: BedDouble, group: "Occupancy" },
+  { to: "/occupancy/owner", label: "Owner Portal", icon: KeyRound, group: "Occupancy" },
+  { to: "/occupancy/admin", label: "Admin", icon: LayoutGrid, group: "Occupancy" },
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { role, setRole, currentTcmId, setCurrentTcmId, tcms, leads, tours, followUps, handoffs, bookings } = useApp();
@@ -95,12 +106,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const navByRole: Record<typeof role, NavItem[]> = {
     hr: [
-      // --- Occupancy Engine: the five routes backed by a real Postgres schema ---
-      { to: "/occupancy", label: "Occupancy Engine", icon: Gauge, accent: true },
-      { to: "/occupancy/radar", label: "Vacancy Radar", icon: Radar, accent: true },
-      { to: "/occupancy/rescue", label: "Rescue List", icon: Flame, accent: true },
-      { to: "/occupancy/pipeline", label: "Lead Pipeline", icon: Users, accent: true },
-      { to: "/occupancy/inventory", label: "Bed Inventory", icon: BedDouble, accent: true },
+      ...occupancyNav,
       { to: "/os", label: "Closing OS", icon: Sparkles, accent: true },
       { to: "/coach", label: "Coach", icon: Sparkles, accent: true },
       { to: "/today", label: "Today", icon: Sun, badge: queue.length },
@@ -159,12 +165,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       { to: "/help", label: "How to use", icon: HelpCircle },
     ],
     "flow-ops": [
-      // --- Occupancy Engine: the five routes backed by a real Postgres schema ---
-      { to: "/occupancy", label: "Occupancy Engine", icon: Gauge, accent: true },
-      { to: "/occupancy/radar", label: "Vacancy Radar", icon: Radar, accent: true },
-      { to: "/occupancy/rescue", label: "Rescue List", icon: Flame, accent: true },
-      { to: "/occupancy/pipeline", label: "Lead Pipeline", icon: Users, accent: true },
-      { to: "/occupancy/inventory", label: "Bed Inventory", icon: BedDouble, accent: true },
+      ...occupancyNav,
       { to: "/os", label: "Closing OS", icon: Sparkles, accent: true },
       { to: "/coach", label: "Coach", icon: Sparkles, accent: true },
       { to: "/today", label: "Today", icon: Sun, badge: queue.length },
@@ -222,12 +223,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       { to: "/help", label: "How to use", icon: HelpCircle },
     ],
     tcm: [
-      // --- Occupancy Engine: the five routes backed by a real Postgres schema ---
-      { to: "/occupancy", label: "Occupancy Engine", icon: Gauge, accent: true },
-      { to: "/occupancy/radar", label: "Vacancy Radar", icon: Radar, accent: true },
-      { to: "/occupancy/rescue", label: "Rescue List", icon: Flame, accent: true },
-      { to: "/occupancy/pipeline", label: "Lead Pipeline", icon: Users, accent: true },
-      { to: "/occupancy/inventory", label: "Bed Inventory", icon: BedDouble, accent: true },
+      ...occupancyNav,
       { to: "/os", label: "Closing OS", icon: Sparkles, accent: true },
       { to: "/coach", label: "Coach", icon: Sparkles, accent: true },
       { to: "/today", label: "Today", icon: Sun, badge: queue.length },
@@ -282,6 +278,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       { to: "/help", label: "How to use", icon: HelpCircle },
     ],
     owner: [
+      { to: "/occupancy/owner", label: "My Rooms", icon: KeyRound, group: "Occupancy" },
       { to: "/coach", label: "Coach", icon: Sparkles, accent: true },
       { to: "/wa", label: "WhatsApp CRM", icon: MessageSquare, accent: true },
       { to: "/movement", label: "Movement OS", icon: Compass, accent: true },
@@ -308,7 +305,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
   const items = navByRole[role];
 
-  const isActive = (to: string) => (to === "/" ? path === "/" : path === to || path.startsWith(to + "/"));
+  // "/" and "/occupancy" are parents of other nav items, so they only match exactly.
+  const isActive = (to: string) =>
+    to === "/" || to === "/occupancy" ? path === to : path === to || path.startsWith(to + "/");
 
   return (
     <PictureInPictureProvider>
@@ -347,12 +346,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         })()}
 
         <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto scrollbar-thin">
-          {items.map((it) => {
+          {items.map((it, i) => {
             const Icon = it.icon;
             const active = isActive(it.to);
+            const group = it.group ?? "More tools";
+            const showHeading = i === 0 ? Boolean(it.group) : group !== (items[i - 1]!.group ?? "More tools");
             return (
+              <Fragment key={`${it.to}-${it.label}`}>
+              {showHeading && (
+                <div className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/60 first:pt-1">
+                  {group}
+                </div>
+              )}
               <Link
-                key={`${it.to}-${it.label}`}
                 to={it.to}
                 className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors",
@@ -375,6 +381,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </span>
                 )}
               </Link>
+              </Fragment>
             );
           })}
         </nav>
