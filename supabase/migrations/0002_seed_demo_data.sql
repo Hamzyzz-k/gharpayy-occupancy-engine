@@ -101,10 +101,13 @@ end $$;
 
 do $$
 declare
-  first_names text[] := array[
-    'Rahul','Priya','Arun','Neha','Karthik','Sneha','Vikram','Ananya','Rohit','Divya',
-    'Aditya','Shreya','Nikhil','Meera','Sanjay','Pooja','Varun','Kavya','Manish','Ritu',
-    'Siddharth','Aishwarya','Harsh','Tanvi','Akash','Swati','Gaurav','Nandini','Abhishek','Isha'];
+  -- Split by gender so a tenant's name matches the room they're in.
+  male_names   text[] := array[
+    'Rahul','Arun','Karthik','Vikram','Rohit','Aditya','Nikhil','Sanjay',
+    'Varun','Manish','Siddharth','Harsh','Akash','Gaurav','Abhishek'];
+  female_names text[] := array[
+    'Priya','Neha','Sneha','Ananya','Divya','Shreya','Meera','Pooja',
+    'Kavya','Ritu','Aishwarya','Tanvi','Swati','Nandini','Isha'];
   last_names  text[] := array[
     'Sharma','Reddy','Nair','Iyer','Gupta','Patel','Kumar','Rao','Singh','Menon',
     'Desai','Joshi','Bhat','Pillai','Verma','Agarwal','Shetty','Mishra'];
@@ -116,9 +119,15 @@ declare
   v_vacant_days int;
   v_name        text;
 begin
-  for bd in select id, monthly_rent from public.beds loop
+  for bd in
+    select b.id, b.monthly_rent, r.gender
+    from public.beds b join public.rooms r on r.id = b.room_id
+  loop
     roll   := random();
-    v_name := first_names[1 + floor(random() * array_length(first_names,1))::int]
+    v_name := case when bd.gender = 'female'
+                then female_names[1 + floor(random() * array_length(female_names,1))::int]
+                else male_names[1 + floor(random() * array_length(male_names,1))::int]
+              end
               || ' ' ||
               last_names[1 + floor(random() * array_length(last_names,1))::int];
 
@@ -162,11 +171,13 @@ end $$;
 
 do $$
 declare
-  first_names text[] := array[
-    'Aman','Sanya','Rajat','Preeti','Deepak','Anjali','Kunal','Shruti','Naveen','Ritika',
-    'Yash','Megha','Sameer','Pallavi','Tarun','Bhavya','Imran','Lakshmi','Sahil','Trisha',
-    'Ravi','Sonal','Ajay','Nisha','Vivek','Garima','Arjun','Pooja','Rohan','Kriti',
-    'Farhan','Simran','Dhruv','Payal','Aakash','Juhi'];
+  -- Split by gender so a lead's name matches the gender the matcher filters on.
+  male_names   text[] := array[
+    'Aman','Rajat','Deepak','Kunal','Naveen','Yash','Sameer','Tarun','Imran',
+    'Sahil','Ravi','Ajay','Vivek','Arjun','Rohan','Farhan','Dhruv','Aakash'];
+  female_names text[] := array[
+    'Sanya','Preeti','Anjali','Shruti','Ritika','Megha','Pallavi','Bhavya','Lakshmi',
+    'Trisha','Sonal','Nisha','Garima','Pooja','Kriti','Simran','Payal','Juhi'];
   last_names  text[] := array[
     'Sharma','Reddy','Nair','Iyer','Gupta','Patel','Kumar','Rao','Singh','Menon',
     'Desai','Joshi','Bhat','Pillai','Verma','Agarwal','Shetty','Mishra','Khan','Das'];
@@ -217,7 +228,10 @@ begin
       (name, phone, email, gender, budget_max, preferred_localities, preferred_sharing,
        move_in_date, source, stage, owner_name, last_contacted_at, created_at, lost_reason)
     values (
-      first_names[1 + floor(random() * array_length(first_names,1))::int] || ' ' ||
+      case when v_gender = 'female'
+        then female_names[1 + floor(random() * array_length(female_names,1))::int]
+        else male_names[1 + floor(random() * array_length(male_names,1))::int]
+      end || ' ' ||
       last_names[1 + floor(random() * array_length(last_names,1))::int],
       '+9197' || lpad(floor(random()*10000000)::text, 7, '0'),
       null,
@@ -259,7 +273,8 @@ begin
                'Budget slightly below our rate',
                'Comparing with another PG nearby'])[1 + floor(random()*6)::int],
         owners[1 + floor(random() * array_length(owners,1))::int],
-        v_created + (random() * 20 || ' days')::interval
+        -- Somewhere between the lead arriving and now, never in the future.
+        v_created + random() * (now() - v_created)
       );
     end loop;
 
