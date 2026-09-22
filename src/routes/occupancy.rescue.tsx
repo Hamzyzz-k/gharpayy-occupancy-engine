@@ -21,7 +21,7 @@ import { dueLabel, inr } from '@/lib/occupancy/format'
 export const Route = createFileRoute('/occupancy/rescue')({
   head: () => ({
     meta: [
-      { title: 'Rescue List — Gharpayy' },
+      { title: 'Rescue List | Gharpayy' },
       {
         name: 'description',
         content:

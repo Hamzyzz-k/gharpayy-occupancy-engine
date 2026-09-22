@@ -31,7 +31,7 @@ import { inr, inrShort, shortDate, shortProperty, daysUntil } from '@/lib/occupa
 export const Route = createFileRoute('/occupancy/radar')({
   head: () => ({
     meta: [
-      { title: 'Vacancy Radar — Gharpayy' },
+      { title: 'Vacancy Radar | Gharpayy' },
       {
         name: 'description',
         content:

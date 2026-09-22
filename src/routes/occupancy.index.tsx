@@ -29,7 +29,7 @@ import { inr, inrK, inrShort, shortDate, shortProperty, daysUntil } from '@/lib/
 export const Route = createFileRoute('/occupancy/')({
   head: () => ({
     meta: [
-      { title: 'Occupancy Engine — Gharpayy' },
+      { title: 'Occupancy Engine | Gharpayy' },
       {
         name: 'description',
         content: 'Revenue at Risk: every empty bed, what it is costing, and who can fill it.',

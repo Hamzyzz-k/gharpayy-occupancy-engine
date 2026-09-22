@@ -40,7 +40,7 @@ import type { Activity, LeadStage } from '@/lib/occupancy/types'
 export const Route = createFileRoute('/occupancy/lead/$leadId')({
   head: () => ({
     meta: [
-      { title: 'Lead — Gharpayy' },
+      { title: 'Lead | Gharpayy' },
       { name: 'description', content: 'Lead detail, matched beds, and full activity history.' },
     ],
   }),

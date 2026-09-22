@@ -19,7 +19,7 @@ import type { BedAvailability } from '@/lib/occupancy/types'
 export const Route = createFileRoute('/occupancy/inventory')({
   head: () => ({
     meta: [
-      { title: 'Inventory — Gharpayy' },
+      { title: 'Inventory | Gharpayy' },
       {
         name: 'description',
         content: 'Bed-level inventory across every property, with live availability.',

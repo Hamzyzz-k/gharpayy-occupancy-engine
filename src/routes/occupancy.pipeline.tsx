@@ -22,7 +22,7 @@ import { rescueScore } from '@/lib/occupancy/rescue'
 export const Route = createFileRoute('/occupancy/pipeline')({
   head: () => ({
     meta: [
-      { title: 'Lead Pipeline — Gharpayy' },
+      { title: 'Lead Pipeline | Gharpayy' },
       {
         name: 'description',
         content: 'Every lead, every stage, backed by Postgres. Filter, search, drill in.',
