@@ -128,3 +128,22 @@ export interface BedAvailability {
   /** Rupees already lost on this bed: (rent/30) * days_vacant */
   revenue_lost: number
 }
+
+/** An activity row with its lead's name joined in, for cross-lead feeds. */
+export interface ActivityWithLead extends Activity {
+  leads: { name: string } | null
+}
+
+/** A tenancy with the bed, room and property it belongs to. */
+export interface Booking {
+  id: string
+  tenant_name: string
+  move_in_date: string
+  monthly_rent: number
+  status: 'active' | 'notice_period' | 'ended'
+  created_at: string
+  beds: {
+    bed_label: string
+    rooms: { room_number: string; properties: { name: string } | null } | null
+  } | null
+}

@@ -1,7 +1,7 @@
 /**
  * Data access for the Occupancy Engine.
  *
- * Everything on our five screens comes through here, and every one of these
+ * Everything on the occupancy screens comes through here, and every one of these
  * hits Postgres. Nothing is mocked. That's the whole point of the exercise.
  */
 
@@ -9,6 +9,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import type {
   Activity,
+  ActivityWithLead,
+  Booking,
   BedAvailability,
   Lead,
   LeadStage,
@@ -33,6 +35,8 @@ export const qk = {
   beds: ['occupancy', 'beds'] as const,
   properties: ['occupancy', 'properties'] as const,
   tasks: ['occupancy', 'tasks'] as const,
+  recentActivity: ['occupancy', 'recent-activity'] as const,
+  recentBookings: ['occupancy', 'recent-bookings'] as const,
 }
 
 function unwrap<T>({ data, error }: { data: T | null; error: any }): T {
@@ -259,6 +263,137 @@ export function useCreateTask() {
       if (error) throw new Error(error.message)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.tasks }),
+  })
+}
+
+/** Latest activity across every lead, for the admin feed. */
+export function useRecentActivity(limit = 25) {
+  return useQuery({
+    queryKey: qk.recentActivity,
+    ...FAIL_FAST,
+    queryFn: async (): Promise<ActivityWithLead[]> =>
+      unwrap(
+        await withTimeout(
+          db
+            .from('activities')
+            .select('*, leads(name)')
+            .order('created_at', { ascending: false })
+            .limit(limit),
+        ),
+      ),
+  })
+}
+
+/** Most recent tenancies, i.e. beds that were sold, newest first. */
+export function useRecentBookings(limit = 12) {
+  return useQuery({
+    queryKey: qk.recentBookings,
+    ...FAIL_FAST,
+    queryFn: async (): Promise<Booking[]> =>
+      unwrap(
+        await withTimeout(
+          db
+            .from('tenancies')
+            .select(
+              'id, tenant_name, move_in_date, monthly_rent, status, created_at, beds(bed_label, rooms(room_number, properties(name)))',
+            )
+            .order('created_at', { ascending: false })
+            // Seeded tenancies share one created_at, so fall back to move-in date.
+            .order('move_in_date', { ascending: false })
+            .limit(limit),
+        ),
+      ),
+  })
+}
+
+function invalidateInventory(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: qk.beds })
+  qc.invalidateQueries({ queryKey: qk.leads })
+  qc.invalidateQueries({ queryKey: qk.recentActivity })
+  qc.invalidateQueries({ queryKey: qk.recentBookings })
+}
+
+const today = () => new Date().toISOString().slice(0, 10)
+
+/**
+ * Mark one or more beds as sold: each gets an active tenancy and flips to
+ * occupied. The update is guarded on status = 'vacant', so two people selling
+ * the same bed at once can't both succeed. If a lead is given, they move to
+ * Booked and the sale is logged on their timeline.
+ */
+export function useSellBeds() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: {
+      beds: { bed_id: string; monthly_rent: number }[]
+      tenantName: string
+      tenantPhone?: string
+      moveInDate: string
+      leadId?: string
+      soldBy?: string
+    }) => {
+      for (const bed of input.beds) {
+        const { data: claimed, error: claimError } = await db
+          .from('beds')
+          .update({ status: 'occupied', vacant_since: null })
+          .eq('id', bed.bed_id)
+          .eq('status', 'vacant')
+          .select('id')
+        if (claimError) throw new Error(claimError.message)
+        if (!claimed?.length) throw new Error('That bed was already sold. Refresh and try again.')
+
+        const { error } = await db.from('tenancies').insert({
+          bed_id: bed.bed_id,
+          tenant_name: input.tenantName,
+          tenant_phone: input.tenantPhone || null,
+          move_in_date: input.moveInDate,
+          monthly_rent: bed.monthly_rent,
+          status: 'active',
+        })
+        if (error) {
+          // Put the bed back rather than leave it occupied with no tenant.
+          await db.from('beds').update({ status: 'vacant', vacant_since: today() }).eq('id', bed.bed_id)
+          throw new Error(error.message)
+        }
+      }
+
+      if (input.leadId) {
+        await db
+          .from('leads')
+          .update({ stage: 'booked', last_contacted_at: new Date().toISOString() })
+          .eq('id', input.leadId)
+        await db.from('activities').insert({
+          lead_id: input.leadId,
+          type: 'stage_change',
+          outcome: 'booked',
+          notes: `Booked ${input.beds.length === 1 ? 'a bed' : `${input.beds.length} beds`}, moving in ${input.moveInDate}`,
+          created_by: input.soldBy ?? 'Owner',
+        })
+      }
+    },
+    onSuccess: () => invalidateInventory(qc),
+  })
+}
+
+/** The tenant has left: end their tenancy and put the bed back on sale from today. */
+export function useMarkBedVacant() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (bedId: string) => {
+      const { error: tErr } = await db
+        .from('tenancies')
+        .update({ status: 'ended', actual_move_out_date: today() })
+        .eq('bed_id', bedId)
+        .in('status', ['active', 'notice_period'])
+      if (tErr) throw new Error(tErr.message)
+
+      const { error } = await db
+        .from('beds')
+        .update({ status: 'vacant', vacant_since: today() })
+        .eq('id', bedId)
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => invalidateInventory(qc),
   })
 }
 
