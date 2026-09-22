@@ -114,6 +114,18 @@ of 123 active leads critical, 46 of them tied at 100, because ten days of
 silence alone reached the threshold whatever the move-in date. Adding the parts
 keeps urgency in charge: 20 critical, 38 warm, 56 fine, 9 gone cold.
 
+### Owner portal and admin view
+
+- **`/occupancy/owner`**: a property owner sees their rooms and marks a bed, or
+  a whole room, as sold. The form suggests the leads the match engine already
+  ranked for that bed; choosing one moves that lead to Booked. Selling is
+  guarded on the bed still being empty, so two people can't sell the same bed,
+  and a tenant moving out puts the bed back on sale from that day.
+- **`/occupancy/admin`**: the whole business on one page. Occupancy, rent roll,
+  money lost, conversion and open tasks; every property ranked by occupancy;
+  the pipeline by stage; each salesperson's leads, bookings and critical leads;
+  recent bookings; and a live feed of activity across every lead.
+
 ---
 
 ## Design
@@ -131,6 +143,9 @@ keeps urgency in charge: 20 critical, 38 warm, 56 fine, 9 gone cold.
   All seven screens pass at all eight widths.
 - **Demo data is labelled** on every screen: the properties and leads are
   generated, the backend is live.
+- **The demo data holds together.** Names match gender, since the matcher uses
+  gender as a hard filter and "Farhan" in a women's room would undercut it, and
+  no activity is dated in the future.
 
 ---
 
